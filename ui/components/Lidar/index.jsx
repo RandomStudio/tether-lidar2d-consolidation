@@ -10,6 +10,7 @@ const Lidar = ({
   color,
   pointSize,
   scale,
+  fadeSpeed,
 }) => {
   const width = 512;
   const height = 512;
@@ -19,8 +20,13 @@ const Lidar = ({
     if (canvasEl.current) {
       const canvas = canvasEl.current;
       const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, width, height);
+      // ctx.clearRect(0, 0, width, height);
+      // fade out previous canvas contents
+      ctx.globalAlpha = fadeSpeed;
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(0, 0, width, height);
       // draw origin
+      ctx.globalCompositeOperation = 'source-over';
       ctx.strokeStyle = getColorString(color);
       ctx.beginPath();
       ctx.globalAlpha = 0.35;
@@ -76,6 +82,7 @@ Lidar.propTypes = {
   color: PropTypes.arrayOf(PropTypes.number),
   pointSize: PropTypes.number,
   scale: PropTypes.number,
+  fadeSpeed: PropTypes.number,
 };
 
 Lidar.defaultProps = {
@@ -85,7 +92,8 @@ Lidar.defaultProps = {
   y: 0,
   color: [255, 0, 0],
   pointSize: 2,
-  scale: 1
+  scale: 1,
+  fadeSpeed: 0.06,
 };
 
 export default Lidar;

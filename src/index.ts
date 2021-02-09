@@ -55,34 +55,39 @@ class LidarConsolidationAgent extends TetherAgent {
     this.registerMessageClass("RPLidar.proto:rplidar.Scan", Scan);
 
     this.consolidator = new Consolidator();
+    this.start();
+  }
 
+  start = async () => {
     // load lidar transformations from external file
-    FileIO.load(localConfig.lidarConfigPath)
+    await FileIO.load(localConfig.lidarConfigPath)
       .then(config => {
+        logger.info("Loaded config:", config);
         store.dispatch(initStore({
           httpPort: localConfig.httpPort,
           wsPort: localConfig.wsPort,
-          ...config
+          lidars: config
         } as StoreState));
       })
       .catch(err => {
         logger.error(`Could not load config file, saving default config to new file.`);
         store.dispatch(initStore(defaultState));
-        FileIO.save(store.getState().lidars, localConfig.lidarConfigPath);
+        const { lidars } = store.getState();
+        FileIO.save(lidars, localConfig.lidarConfigPath);
       });
 
     this.getPlugs()
-    .filter(p => (
-      p.getConfiguration().getFlow() === "in"
-      && p.getConfiguration().getSchemaPath() === "RPLidar.proto:rplidar.Scan"
-    ))
-    .forEach(plug => {
-      // Listen for incoming lidar scan messages
-      const plugName = plug.getConfiguration().getName();
-      this.registerMessageHandler(plugName, (message: Scan, properties: MessageProperties) => {
-        this.onScanReceived(message, properties, plugName);
-      });
-    })
+      .filter(p => (
+        p.getConfiguration().getFlow() === "in"
+        && p.getConfiguration().getSchemaPath() === "RPLidar.proto:rplidar.Scan"
+      ))
+      .forEach(plug => {
+        // Listen for incoming lidar scan messages
+        const plugName = plug.getConfiguration().getName();
+        this.registerMessageHandler(plugName, (message: Scan, properties: MessageProperties) => {
+          this.onScanReceived(message, properties, plugName);
+        });
+      })
 
     this.getActivatedPlug("Points").then(plug => {
       this.outPlug = plug;
@@ -93,8 +98,6 @@ class LidarConsolidationAgent extends TetherAgent {
 
     this.wsServer = new WebSocketServer();
     this.wsServer.start(localConfig.wsPort);
-
-    // TODO write adjustments to lidar transformations to external file
   }
 
   private onScanReceived = (message: Scan, properties: MessageProperties, plugName: string) => {
@@ -104,6 +107,7 @@ class LidarConsolidationAgent extends TetherAgent {
     // make sure that each connected lidar is registered in the config file
     const lidarConfig = store.getState().lidars.find(l => l.serial === serial);
     if (!lidarConfig) {
+      logger.info(`Found unregistered lidar agent with serial ${serial}. Adding new config.`);
       // register new lidar with its serial number
       store.dispatch(addLidar({
         serial,
@@ -113,7 +117,8 @@ class LidarConsolidationAgent extends TetherAgent {
         y: 0,
         color: convert.hsv.rgb(Math.round(Math.random() * 360), 100, 100) // assign random color
       }));
-      FileIO.save(store.getState(), localConfig.lidarConfigPath);
+      const { lidars } = store.getState();
+      FileIO.save(lidars, localConfig.lidarConfigPath);
     }
 
     // retrieve lidar samples from the message

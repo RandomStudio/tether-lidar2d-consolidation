@@ -18,7 +18,8 @@ class App extends React.Component {
       lidars: [],
       consolidatedPoints: [],
       pointSize: 2,
-      scale: 1,
+      scale: 0.2,
+      fadeSpeed: 0.06,
       socketState: null,
       busy: false,
       error: null,
@@ -30,6 +31,7 @@ class App extends React.Component {
     await this.fetchURL(
       `/api/config`,
       { method: 'GET' },
+      true,
       'Could not load config.'
     ).then(json => {
       const { host, wsPort } = json;
@@ -48,6 +50,7 @@ class App extends React.Component {
     await this.fetchURL(
       `/api/lidars/all`,
       { method: 'GET' },
+      true,
       'Could not load lidar data.'
     ).then(json => {
       this.setState({
@@ -109,18 +112,6 @@ class App extends React.Component {
           : l.rotation
       }))
     });
-    // send to server
-    // this.fetchURL(
-    //   `/api/lidar/rotation`,
-    //   {
-    //     method: 'PUT',
-    //     body: {
-    //       serial,
-    //       rotation
-    //     }
-    //   },
-    //   `Could not save rotation.`
-    // );
   }
 
   onSetTranslation = (serial, x, y) => {
@@ -130,26 +121,13 @@ class App extends React.Component {
       lidars: lidars.map(l => ({
         ...l,
         x: l.serial === serial
-          ? x
+          ? Math.round(x)
           : l.x,
         y: l.serial === serial
-          ? y
+          ? Math.round(y)
           : l.y,
       }))
     });
-    // send to server
-    // this.fetchURL(
-    //   `/api/lidar/translation`,
-    //   {
-    //     method: 'PUT',
-    //     body: {
-    //       serial,
-    //       x,
-    //       y
-    //     }
-    //   },
-    //   `Could not save translation.`
-    // );
   }
 
   onSetColor = (serial, r, g, b) => {
@@ -163,18 +141,6 @@ class App extends React.Component {
           : l.color,
       }))
     });
-    // send to server
-    // this.fetchURL(
-    //   `/api/lidar/color`,
-    //   {
-    //     method: 'PUT',
-    //     body: {
-    //       serial,
-    //       color
-    //     }
-    //   },
-    //   `Could not save translation.`
-    // );
   }
 
   onSetPointSize = (value) => {
@@ -184,30 +150,61 @@ class App extends React.Component {
   onSetScale = (value) => {
     this.setState({ scale: value });
   }
+  
+  onSetFadeSpeed = (value) => {
+    this.setState({ fadeSpeed: value });
+  }
+
+  onSave = (serial) => {
+    const { lidars } = this.state;
+    const lidar = lidars.find(l => l.serial === serial);
+    if (lidar) {
+      const { rotation, x, y, color } = lidar;
+      this.fetchURL(
+        '/api/lidar',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            serial,
+            rotation,
+            x,
+            y,
+            color
+          })
+        },
+        false,
+        'Could not save lidar configuration.'
+      );
+    }
+  }
 
   /**
    * Generic method to initiate an http request, including state
    * updates for the UI (i.e. busy indicator and error messages)
    * @param {string} url 
    * @param {*} options 
+   * @param {boolean} expectJSONResponse
    * @param {string} errorMessage 
    */
-  fetchURL = (url, options, errorMessage) => {
+  fetchURL = (url, options, expectJSONResponse, errorMessage) => {
     this.setState({
       busy: true,
     });
     return fetch(url, options)
       .then(response => {
         if (response.ok) {
-          return response.json();
+          return expectJSONResponse ? response.json() : true;
         } 
         throw new Error(response.status);
       })
-      .then(json => {
+      .then(result => {
         this.setState({
           busy: false,
         });
-        return json;
+        return result;
       })
       .catch(err => {
         this.setState({
@@ -230,6 +227,7 @@ class App extends React.Component {
       consolidatedPoints,
       pointSize,
       scale,
+      fadeSpeed,
       socketState,
       busy,
       error
@@ -246,6 +244,7 @@ class App extends React.Component {
             color={color}
             pointSize={pointSize}
             scale={scale}
+            fadeSpeed={fadeSpeed}
           />
         ))}
         <Consolidation
@@ -256,11 +255,14 @@ class App extends React.Component {
           lidars={lidars}
           pointSize={pointSize}
           scale={scale}
+          fadeSpeed={fadeSpeed}
           onSetRotation={this.onSetRotation}
           onSetTranslation={this.onSetTranslation}
           onSetColor={this.onSetColor}
           onSetPointSize={this.onSetPointSize}
           onSetScale={this.onSetScale}
+          onSetFadeSpeed={this.onSetFadeSpeed}
+          onSave={this.onSave}
         />
         {socketState !== SocketState.OPEN
           && (

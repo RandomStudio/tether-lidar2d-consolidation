@@ -1,24 +1,27 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import HSlider from '../HSlider';
+
+import Row from './row';
 import './index.scss';
 
 const Controls = ({
   lidars,
   pointSize,
   scale,
+  fadeSpeed,
   onSetRotation,
   onSetTranslation,
   onSetColor,
   onSetPointSize,
-  onSetScale
+  onSetScale,
+  onSetFadeSpeed,
+  onSave,
 }) => {
   const [selectedSerial, onSelectLidar] = useState(null);
   const lidar = lidars.find(l => l.serial === selectedSerial);
   return (
     <div className="controls">
       <select onChange={event => {
-        console.log(event.target.value);
         onSelectLidar(event.target.value);
       }}
       >
@@ -29,138 +32,100 @@ const Controls = ({
       </select>
       {lidar && (
         <>
-          <div className="row">
-            <span>Rotation</span>
-            <HSlider
-              width={10}
-              widthUnit="em"
-              className="slider"
-              min={0}
-              max={360}
-              value={lidar.rotation}
-              onChange={value => {
-                onSetRotation(selectedSerial, value);
-              }}
-            />
-            <span>
-              {lidar.rotation}
-              º
-            </span>
-          </div>
-          <div className="row">
-            <span>Translation X</span>
-            <HSlider
-              width={10}
-              widthUnit="em"
-              className="slider"
-              min={-10000}
-              max={10000}
-              value={lidar.x}
-              onChange={value => {
-                onSetTranslation(selectedSerial, value, lidar.y);
-              }}
-            />
-            <span>
-              {lidar.x}
-              mm
-            </span>
-          </div>
-          <div className="row">
-            <span>Translation Y</span>
-            <HSlider
-              width={10}
-              widthUnit="em"
-              className="slider"
-              min={-10000}
-              max={10000}
-              value={lidar.y}
-              onChange={value => {
-                onSetTranslation(selectedSerial, lidar.x, value);
-              }}
-            />
-            <span>
-              {lidar.y}
-              mm
-            </span>
-          </div>
-          <div className="row">
-            <span>Color</span>
-            <div className="col">
-              <div className="row">
-                <span>R</span>
-                <HSlider
-                  width={10}
-                  widthUnit="em"
-                  className="slider"
-                  min={0}
-                  max={255}
-                  value={lidar.color[0]}
-                  onChange={value => {
-                    onSetColor(selectedSerial, value, lidar.color[1], lidar.color[2]);
-                  }}
-                />
-                <span>{lidar.color[0]}</span>
-              </div>
-              <div className="row">
-                <span>G</span>
-                <HSlider
-                  width={10}
-                  widthUnit="em"
-                  className="slider"
-                  min={0}
-                  max={255}
-                  value={lidar.color[1]}
-                  onChange={value => {
-                    onSetColor(selectedSerial, lidar.color[0], value, lidar.color[2]);
-                  }}
-                />
-                <span>{lidar.color[1]}</span>
-              </div>
-              <div className="row">
-                <span>B</span>
-                <HSlider
-                  width={10}
-                  widthUnit="em"
-                  className="slider"
-                  min={0}
-                  max={255}
-                  value={lidar.color[2]}
-                  onChange={value => {
-                    onSetColor(selectedSerial, lidar.color[0], lidar.color[1], value);
-                  }}
-                />
-                <span>{lidar.color[2]}</span>
-              </div>
-            </div>
+          <Row
+            label="Rotation"
+            min={0}
+            max={360}
+            value={lidar.rotation}
+            precision={1}
+            units="º"
+            onChange={value => {
+              onSetRotation(selectedSerial, value);
+            }}
+          />
+          <Row
+            label="X"
+            min={-10000}
+            max={10000}
+            value={lidar.x}
+            precision={0}
+            units="mm"
+            onChange={value => {
+              onSetTranslation(selectedSerial, value, lidar.y);
+            }}
+          />
+          <Row
+            label="Y"
+            min={-10000}
+            max={10000}
+            value={lidar.y}
+            precision={0}
+            units="mm"
+            onChange={value => {
+              onSetTranslation(selectedSerial, lidar.x, value);
+            }}
+          />
+          <Row
+            label="Color R"
+            min={0}
+            max={255}
+            precision={0}
+            value={lidar.color[0]}
+            onChange={value => {
+              onSetColor(selectedSerial, value, lidar.color[1], lidar.color[2]);
+            }}
+          />
+          <Row
+            label="G"
+            min={0}
+            max={255}
+            precision={0}
+            value={lidar.color[1]}
+            onChange={value => {
+              onSetColor(selectedSerial, lidar.color[0], value, lidar.color[2]);
+            }}
+          />
+          <Row
+            label="B"
+            min={0}
+            max={255}
+            precision={0}
+            value={lidar.color[2]}
+            onChange={value => {
+              onSetColor(selectedSerial, lidar.color[0], lidar.color[1], value);
+            }}
+          />
+          <div className="buttons">
+            <button className="save" type="submit" onClick={() => onSave(selectedSerial)}>Save</button>
           </div>
         </>
       )}
-      <div className="row">
-        <span>Point size</span>
-        <HSlider
-          width={10}
-          widthUnit="em"
-          className="slider"
-          min={1}
-          max={10}
-          value={pointSize}
-          onChange={onSetPointSize}
-        />
-        <span>{pointSize}</span>
-      </div>
-      <div className="row">
-        <span>Scale</span>
-        <HSlider
-          width={10}
-          widthUnit="em"
-          className="slider"
-          min={0.01}
-          max={2}
-          value={scale}
-          onChange={onSetScale}
-        />
-        <span>{scale}</span>
-      </div>
+      <hr className="separator" />
+      <Row
+        label="Point size"
+        min={1}
+        max={10}
+        value={pointSize}
+        precision={1}
+        units="px"
+        onChange={onSetPointSize}
+      />
+      <Row
+        label="Scale"
+        min={0.01}
+        max={2}
+        value={scale}
+        precision={2}
+        onChange={onSetScale}
+      />
+      <Row
+        label="Fade speed"
+        min={0}
+        max={1}
+        value={fadeSpeed}
+        precision={3}
+        onChange={onSetFadeSpeed}
+      />
     </div>
   );
 };
@@ -175,11 +140,14 @@ Controls.propTypes = {
   })),
   pointSize: PropTypes.number.isRequired,
   scale: PropTypes.number.isRequired,
+  fadeSpeed: PropTypes.number.isRequired,
   onSetRotation: PropTypes.func.isRequired,
   onSetTranslation: PropTypes.func.isRequired,
   onSetColor: PropTypes.func.isRequired,
   onSetPointSize: PropTypes.func.isRequired,
   onSetScale: PropTypes.func.isRequired,
+  onSetFadeSpeed: PropTypes.func.isRequired,
+  onSave: PropTypes.func.isRequired,
 };
 
 Controls.defaultProps = {

@@ -1,3 +1,4 @@
+import path from "path";
 import { ActionType } from './actions';
 import { StoreState } from './types';
 
@@ -5,6 +6,7 @@ export const defaultState: StoreState = {
   host: "127.0.0.1",
   httpPort: 3000,
   wsPort: 3001,
+  lidarConfigPath: path.resolve(__dirname, "..", "..", "dist", "lidars.json"),
   lidars: []
 };
 

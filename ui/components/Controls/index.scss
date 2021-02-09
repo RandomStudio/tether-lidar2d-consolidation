@@ -20,11 +20,59 @@
     box-sizing: border-box;
     @include flex-row;
     justify-content: space-between;
+
+    > .label {
+      width: 4em;
+      text-align: right;
+    }
+    
+    > .slider {
+
+    }
+
+    > .value {
+      width: 4em;
+      @include flex-row;
+      > input {
+        width: 100%;
+        text-align: right;
+        background: transparent;
+        border-style: none;
+        // &:focus {
+        //   outline: none;
+        //   border-style: 1px inset #333;
+        // }
+      }
+      > span {
+        width: 1em;
+      }
+    }
   }
-  .col {
+
+  .buttons {
     width: 100%;
-    padding: 0 0.25em;
-    box-sizing: border-box;
-    @include flex-column;
+    margin-top: 0.5em;
+    @include flex-row;
+    justify-content: flex-end;
+    
+    .save {
+      cursor: pointer;
+      padding: 0.5em;
+      box-sizing: border-box;
+      background-color: #339933;
+      color: black;
+      border-radius: 0.2em;
+      border-color: transparent;
+      &:focus {
+        outline: none;
+      }
+    }
+  }
+
+  .separator {
+    width: 100%;
+    border-style: groove;
+    border-color: rgba(0,0,0,0.2);
+    margin: 1em 0;
   }
 }
