@@ -1,0 +1,169 @@
+import rc from "rc";
+import parseConfig from "parse-strings-in-object";
+import { getLogger } from "log4js";
+import convert from "color-convert";
+
+import { TetherAgent, BaseAgentConfig, PlugDefinition, TrackedPoints2D, TrackedPoint2D, Vector2D } from "tether-agent";
+import Plug from "tether-agent/dist/Plug";
+import { MessageProperties } from "amqplib";
+
+import { Scan } from "./messageClasses/RPLidar_pb";
+
+import { LocalConfig } from "./config/types";
+import defaults from "./config/agent-config";
+import localDefaults from "./config/local-config";
+
+import store from "./redux";
+import FileIO from "./file-io";
+import { addLidar, initStore } from "./redux/actions";
+import { StoreState } from "./redux/types";
+import Consolidator from "./consolidator";
+
+import HTTPServer from "./httpServer";
+import WebSocketServer, { WebSocketMessageType } from "./webSocketServer";
+import { defaultState } from "./redux/reducers";
+
+const agentDefaults: BaseAgentConfig = parseConfig(rc("LidarConsolidationAgent", defaults));
+const localConfig: LocalConfig = parseConfig(rc("LidarConsolidationAgent", localDefaults));
+
+const logger = getLogger("lidar-consolidation-agent");
+logger.level = localConfig.loglevel;
+
+class LidarConsolidationAgent extends TetherAgent {
+  private consolidator: Consolidator;
+  private outPlug: Plug<TrackedPoints2D>;
+  private uiServer: HTTPServer;
+  private wsServer: WebSocketServer;
+
+  constructor() {
+    super({
+      ...agentDefaults,
+      userPlugs: [
+        ...agentDefaults.userPlugs,
+        ...(new Array(localConfig.numLidars).fill(0).map((_, index) => ({
+            flow: "in",
+            name: `Lidar${(index + 1)}`,
+            plugType: "stream",
+            schemaPath: "RPLidar.proto:rplidar.Scan"
+          } as PlugDefinition))
+        )
+      ]
+    });
+
+    logger.debug("Tether agent launched with config", localConfig);
+
+    this.consolidator = new Consolidator();
+
+    // load lidar transformations from external file
+    FileIO.load(localConfig.lidarConfigPath)
+      .then(config => {
+        store.dispatch(initStore({
+          httpPort: localConfig.httpPort,
+          wsPort: localConfig.wsPort,
+          ...config
+        } as StoreState));
+      })
+      .catch(err => {
+        logger.error(`Could not load config file, saving default config to new file.`);
+        store.dispatch(initStore(defaultState));
+        FileIO.save(store.getState().lidars, localConfig.lidarConfigPath);
+      });
+
+    this.getPlugs()
+    .filter(p => (
+      p.getConfiguration().getFlow() === "in"
+      && p.getConfiguration().getSchemaPath() === "RPLidar.proto:rplidar.Scan"
+      ))
+      .forEach(plug => {
+        // Listen for incoming lidar scan messages
+        const plugName = plug.getConfiguration().getName();
+        this.getActivatedPlug(plugName).then((plug: Plug<Scan>) => {
+          logger.debug(`Listening for messages on plug "${plugName}"`);
+          plug.on("message", (message: Scan, properties: MessageProperties) => {
+            this.onScanReceived(message, properties, plugName);
+          });
+        });
+      })
+
+    this.getActivatedPlug("Points").then(plug => {
+      this.outPlug = plug;
+    });
+
+    this.uiServer = new HTTPServer();
+    this.uiServer.start(localConfig.httpPort);
+
+    this.wsServer = new WebSocketServer();
+    this.wsServer.start(localConfig.wsPort);
+
+    // TODO write adjustments to lidar transformations to external file
+  }
+
+  private onScanReceived = (message: Scan, properties: MessageProperties, plugName: string) => {
+    const { headers } = properties;
+    const { agentInstanceId: serial } = headers; // this is populated with the serial number of the sensor
+
+    logger.debug(`Scan data received from lidar with serial ${serial}`);
+    // make sure that each connected lidar is registered in the config file
+    const lidarConfig = store.getState().lidars.find(l => l.serial === serial);
+    if (!lidarConfig) {
+      // register new lidar with its serial number
+      store.dispatch(addLidar({
+        serial,
+        plugName,
+        rotation: 0,
+        x: 0,
+        y: 0,
+        color: convert.hsv.rgb(Math.round(Math.random() * 360), 100, 100) // assign random color
+      }));
+      FileIO.save(store.getState(), localConfig.lidarConfigPath);
+    }
+
+    // retrieve lidar samples from the message
+    const samples = message.getSamlesList().map(s => s.toObject());
+
+    // send lidar samples to connected UI instances
+    this.wsServer.broadcast({
+      type: WebSocketMessageType.LIDAR_UPDATE,
+      serial,
+      samples
+    });
+
+    // determine positions of "non-background" objects based on received lidar points
+    const points = this.consolidator.setScanData({
+      lidarSerial: serial,
+      samples
+    });
+
+    // broadcast consolidated points to connected UI instances
+    this.wsServer.broadcast({
+      type: WebSocketMessageType.CONSOLIDATION_UPDATE,
+      points
+    });
+
+    // send out consolidated points to Tether agents
+    if (this.outPlug) {
+      const msg = this.outPlug.getMessageInstance();
+      msg.setPointsList(points.map(p => {
+        const point = new TrackedPoint2D();
+        point.setId(p.id)
+        point.setSize(p.size);
+        const pos = new Vector2D();
+        pos.setX(p.position.x);
+        pos.setY(p.position.y);
+        point.setPosition(pos);
+        return point;
+      }));
+      this.outPlug.sendMessage(msg);
+    }
+  }
+
+  protected async onShutdown(code: string) {
+    // perform cleanup actions
+    this.outPlug = null;
+    await this.uiServer.stop();
+    return this.wsServer.stop();
+  }
+}
+
+// Instantiate
+new LidarConsolidationAgent();

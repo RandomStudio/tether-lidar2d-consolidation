@@ -1,0 +1,6 @@
+{
+  "imports": [
+    "git@gitlab.random.nu:tether/agents/tether-rp-lidar-agent.git"
+  ],
+  "exports": []
+}
