@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import './index.scss';
 
@@ -11,21 +11,33 @@ const Lidar = ({
   pointSize,
   scale,
 }) => {
-  const width = 256;
-  const height = 256;
+  const width = 512;
+  const height = 512;
   const canvasEl = useRef(null);
 
   useEffect(() => {
     if (canvasEl.current) {
-      const canvas = HTMLCanvasElement(canvasEl.current);
+      const canvas = canvasEl.current;
       const ctx = canvas.getContext('2d');
       ctx.clearRect(0, 0, width, height);
+      // draw origin
+      ctx.strokeStyle = getColorString(color);
+      ctx.beginPath();
+      ctx.globalAlpha = 0.35;
+      ctx.moveTo((0.5 * width) - (100 * scale), 0.5 * height);
+      ctx.lineTo((0.5 * width) + (100 * scale), 0.5 * height);
+      ctx.moveTo(0.5 * width, (0.5 * height) - (100 * scale));
+      ctx.lineTo(0.5 * width, (0.5 * height) + (100 * scale));
+      ctx.stroke();
+      // draw sample points
+      ctx.globalAlpha = 1;
       ctx.fillStyle = getColorString(color);
       samples.filter(s => s.quality > 0).forEach(sample => {
         const { angle, distance } = sample;
-        const px = (0.5 * width) + (Math.cos(angle) * distance * scale) - (0.5 * pointSize);
-        const py = (0.5 * height) + (Math.sin(angle) * distance * scale) - (0.5 * pointSize);
-        ctx.fillRect(px, py, pointSize);
+        const rad = Math.PI * (angle / 180);
+        const px = (0.5 * width) + (Math.cos(rad) * distance * scale) - (0.5 * pointSize);
+        const py = (0.5 * height) + (Math.sin(rad) * distance * scale) - (0.5 * pointSize);
+        ctx.fillRect(px, py, pointSize, pointSize);
       });
     }
   });
@@ -33,7 +45,7 @@ const Lidar = ({
   const getColorString = rgb => {
     let clr = 0;
     for (let i = 0; i < rgb.length; i += 1) {
-      clr |= rgb[i] << ((rgb.length - i) * 8);
+      clr |= rgb[i] << ((rgb.length - 1 - i) * 8);
     }
     return `#${clr.toString(16).padStart(6, '0')}`;
   };

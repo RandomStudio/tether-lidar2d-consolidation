@@ -33,7 +33,8 @@ class HSlider extends React.Component {
     if (onChange && this.trackRef.current) {
       const { pageX } = event.type.substr(0, 5) === 'touch' ? event.touches[0] : event;
       const { left, width } = this.trackRef.current.getBoundingClientRect();
-      onChange(min + ((pageX - left) / width) * (max - min));
+      const factor = Math.max(0, Math.min(1, (pageX - left) / width));
+      onChange(min + factor * (max - min));
     }
   }
 
@@ -54,8 +55,11 @@ class HSlider extends React.Component {
       width,
       widthUnit,
       className,
+      min,
+      max,
       value
     } = this.props;
+    const normalizedValue = (value - min) / (max - min);
     return (
       <div
         className={`hslider ${className}`}
@@ -71,7 +75,7 @@ class HSlider extends React.Component {
           className="handle"
           style={{
             marginLeft: `${
-              width * Math.max(0, Math.min(1, value))
+              width * Math.max(0, Math.min(1, normalizedValue))
             }${widthUnit}`
           }}
         />

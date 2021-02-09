@@ -2,7 +2,7 @@ import { TrackedPoint2D } from "tether-agent";
 import { ScanData } from "./types";
 
 export default class Consolidator {
-  private scans: ScanData[];
+  private scans: ScanData[] = [];
 
   /**
    * Add scan data, replacing preexisting data with the same lidar serial, if any
@@ -32,24 +32,24 @@ export default class Consolidator {
     return [
       {
         id: 0,
-        size: 0.1,
+        size: 100,
         position: {
-          x: 0.25,
-          y: 0.25
+          x: 250,
+          y: 250
         }
       }, {
         id: 1,
-        size: 0.2,
+        size: 200,
         position: {
-          x: 0.5,
-          y: 0.5
+          x: 500,
+          y: 500
         }
       }, {
         id: 2,
-        size: 0.05,
+        size: 50,
         position: {
-          x: 0.8,
-          y: 0.1
+          x: 800,
+          y: 100
         }
       }
     ];

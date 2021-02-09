@@ -99,8 +99,8 @@ class App extends React.Component {
   }
 
   onSetRotation = (serial, value) => {
-    console.log(`Setting lidar rotation. Serial: ${serial}, rotation: ${rotation}deg`);
     // update state
+    const { lidars } = this.state;
     this.setState({
       lidars: lidars.map(l => ({
         ...l,
@@ -124,8 +124,8 @@ class App extends React.Component {
   }
 
   onSetTranslation = (serial, x, y) => {
-    console.log(`Setting lidar translation. Serial: ${serial}, x: ${x}, y: ${y}`);
     // update state
+    const { lidars } = this.state;
     this.setState({
       lidars: lidars.map(l => ({
         ...l,
@@ -153,13 +153,13 @@ class App extends React.Component {
   }
 
   onSetColor = (serial, r, g, b) => {
-    console.log(`Setting lidar color. Serial: ${serial}, color:`, r, g, b);
     // update state
+    const { lidars } = this.state;
     this.setState({
       lidars: lidars.map(l => ({
         ...l,
         color: l.serial === serial
-          ? [r, g, b]
+          ? [Math.round(r), Math.round(g), Math.round(b)]
           : l.color,
       }))
     });
@@ -178,12 +178,10 @@ class App extends React.Component {
   }
 
   onSetPointSize = (value) => {
-    console.log(`Setting point size to ${value}`);
     this.setState({ pointSize: value });
   }
   
   onSetScale = (value) => {
-    console.log(`Setting scale to ${value}`);
     this.setState({ scale: value });
   }
 
@@ -238,13 +236,13 @@ class App extends React.Component {
     } = this.state;
     return (
       <>
-        {lidars.map(({ serial, samples, rotation, translationX, translationY, color }, index) => (
+        {lidars.map(({ samples, rotation, x, y, color }, index) => (
           <Lidar
             key={index}
             samples={samples}
             rotation={rotation}
-            translationX={translationX}
-            translationY={translationY}
+            x={x}
+            y={y}
             color={color}
             pointSize={pointSize}
             scale={scale}

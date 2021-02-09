@@ -17,9 +17,14 @@ const Controls = ({
   const lidar = lidars.find(l => l.serial === selectedSerial);
   return (
     <div className="controls">
-      <select placeholder="Choose a lidar" onChange={onSelectLidar}>
+      <select onChange={event => {
+        console.log(event.target.value);
+        onSelectLidar(event.target.value);
+      }}
+      >
+        <option value="-">Select a lidar sensor</option>
         {lidars.map((l, i) => (
-          <option key={i} value={lidars.serial}>{lidars.serial}</option>
+          <option key={i} value={l.serial}>{l.serial}</option>
         ))}
       </select>
       {lidar && (
@@ -37,6 +42,10 @@ const Controls = ({
                 onSetRotation(selectedSerial, value);
               }}
             />
+            <span>
+              {lidar.rotation}
+              º
+            </span>
           </div>
           <div className="row">
             <span>Translation X</span>
@@ -46,11 +55,15 @@ const Controls = ({
               className="slider"
               min={-10000}
               max={10000}
-              value={lidar.translationX}
+              value={lidar.x}
               onChange={value => {
-                onSetTranslation(selectedSerial, value, lidar.translationY);
+                onSetTranslation(selectedSerial, value, lidar.y);
               }}
             />
+            <span>
+              {lidar.x}
+              mm
+            </span>
           </div>
           <div className="row">
             <span>Translation Y</span>
@@ -60,11 +73,15 @@ const Controls = ({
               className="slider"
               min={-10000}
               max={10000}
-              value={lidar.translationY}
+              value={lidar.y}
               onChange={value => {
-                onSetTranslation(selectedSerial, lidar.translationX, value);
+                onSetTranslation(selectedSerial, lidar.x, value);
               }}
             />
+            <span>
+              {lidar.y}
+              mm
+            </span>
           </div>
           <div className="row">
             <span>Color</span>
@@ -82,6 +99,7 @@ const Controls = ({
                     onSetColor(selectedSerial, value, lidar.color[1], lidar.color[2]);
                   }}
                 />
+                <span>{lidar.color[0]}</span>
               </div>
               <div className="row">
                 <span>G</span>
@@ -96,6 +114,7 @@ const Controls = ({
                     onSetColor(selectedSerial, lidar.color[0], value, lidar.color[2]);
                   }}
                 />
+                <span>{lidar.color[1]}</span>
               </div>
               <div className="row">
                 <span>B</span>
@@ -110,6 +129,7 @@ const Controls = ({
                     onSetColor(selectedSerial, lidar.color[0], lidar.color[1], value);
                   }}
                 />
+                <span>{lidar.color[2]}</span>
               </div>
             </div>
           </div>
@@ -126,6 +146,7 @@ const Controls = ({
           value={pointSize}
           onChange={onSetPointSize}
         />
+        <span>{pointSize}</span>
       </div>
       <div className="row">
         <span>Scale</span>
@@ -133,11 +154,12 @@ const Controls = ({
           width={10}
           widthUnit="em"
           className="slider"
-          min={0.001}
-          max={1}
+          min={0.01}
+          max={2}
           value={scale}
           onChange={onSetScale}
         />
+        <span>{scale}</span>
       </div>
     </div>
   );
@@ -147,8 +169,8 @@ Controls.propTypes = {
   lidars: PropTypes.arrayOf(PropTypes.shape({
     serial: PropTypes.number.isRequired,
     rotation: PropTypes.number.isRequired,
-    translationX: PropTypes.number.isRequired,
-    translationY: PropTypes.number.isRequired,
+    x: PropTypes.number.isRequired,
+    y: PropTypes.number.isRequired,
     color: PropTypes.arrayOf(PropTypes.number).isRequired,
   })),
   pointSize: PropTypes.number.isRequired,

@@ -4,17 +4,22 @@
   position: absolute;
   left: 1em;
   top: 1em;
-  background: #333;
-  border: 1px solid #666;
+  background: #666;
+  border: 1px solid #333;
   padding: 1em;
   box-sizing: border-box;
   @include flex-column;
+
+  > select {
+    margin-bottom: 1em;
+  }
 
   .row {
     width: 100%;
     padding: 0.25em 0;
     box-sizing: border-box;
     @include flex-row;
+    justify-content: space-between;
   }
   .col {
     width: 100%;
