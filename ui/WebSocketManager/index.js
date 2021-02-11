@@ -10,6 +10,7 @@ export const SocketState = Object.freeze({
 export const WebSocketMessageType = Object.freeze({
   SOCKET_STATE_CHANGE: 'wsStateChange',
   LIDAR_UPDATE: 'lidarUpdate',
+  TRANSFORMED_LIDAR_UPDATE: 'transformedLidarUpdate',
   CONSOLIDATION_UPDATE: 'consolidationUpdate',
 });
 
@@ -68,6 +69,11 @@ export default class WebSocketManager extends EventEmitter {
       case WebSocketMessageType.LIDAR_UPDATE: {
         const { serial, samples } = parsed;
         this.emit(WebSocketMessageType.LIDAR_UPDATE, serial, samples);
+      }
+        break;
+      case WebSocketMessageType.TRANSFORMED_LIDAR_UPDATE: {
+        const { serial, samples } = parsed;
+        this.emit(WebSocketMessageType.TRANSFORMED_LIDAR_UPDATE, serial, samples);
       }
         break;
       case WebSocketMessageType.CONSOLIDATION_UPDATE: {

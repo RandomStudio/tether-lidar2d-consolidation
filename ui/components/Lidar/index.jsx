@@ -20,7 +20,6 @@ const Lidar = ({
     if (canvasEl.current) {
       const canvas = canvasEl.current;
       const ctx = canvas.getContext('2d');
-      // ctx.clearRect(0, 0, width, height);
       // fade out previous canvas contents
       ctx.globalAlpha = fadeSpeed;
       ctx.fillStyle = '#000000';
@@ -38,7 +37,7 @@ const Lidar = ({
       // draw sample points
       ctx.globalAlpha = 1;
       ctx.fillStyle = getColorString(color);
-      samples.filter(s => s.quality > 0).forEach(sample => {
+      samples.forEach(sample => {
         const { angle, distance } = sample;
         const rad = Math.PI * (angle / 180);
         const px = (0.5 * width) + (Math.cos(rad) * distance * scale) - (0.5 * pointSize);
@@ -63,7 +62,7 @@ const Lidar = ({
         width={width}
         height={height}
         style={{
-          transform: `rotate(${rotation}deg) translate(${x * scale}px, ${y * scale}px)`
+          transform: `translate(${x * scale}px, ${y * scale}px) rotate(${rotation}deg)`
         }}
       />
     </div>
@@ -72,9 +71,11 @@ const Lidar = ({
 
 Lidar.propTypes = {
   samples: PropTypes.arrayOf(PropTypes.shape({
-    angle: PropTypes.number,
-    distance: PropTypes.number,
-    quality: PropTypes.number,
+    // angle: PropTypes.number,
+    // distance: PropTypes.number,
+    // quality: PropTypes.number,
+    x: PropTypes.number,
+    y: PropTypes.number,
   })),
   rotation: PropTypes.number,
   x: PropTypes.number,

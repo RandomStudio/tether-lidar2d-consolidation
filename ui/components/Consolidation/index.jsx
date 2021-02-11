@@ -13,14 +13,21 @@ const Consolidation = ({ points, scale }) => {
     if (canvasEl.current) {
       const canvas = canvasEl.current;
       const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(0, 0, width, height);
       ctx.strokeStyle = '#ffffff';
       ctx.lineWidth = 1;
       points.forEach(({ size, position: { x, y } }) => {
         ctx.beginPath();
-        ctx.arc(x * scale, y * scale, 0.5 * size * scale, 0, TWO_PI);
+        ctx.arc(
+          (0.5 * width) + (x * scale),
+          (0.5 * height) + (y * scale),
+          0.5 * size * scale,
+          0,
+          TWO_PI
+        );
+        ctx.stroke();
       });
-      ctx.stroke();
     }
   });
 

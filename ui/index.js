@@ -71,7 +71,7 @@ class App extends React.Component {
       lidars: lidars.map(l => ({
         ...l,
         samples: l.serial === serial
-          ? samples
+          ? samples.filter(s => s.quality > 0)
           : l.samples
       }))
     });

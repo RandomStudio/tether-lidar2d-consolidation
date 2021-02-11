@@ -2,12 +2,13 @@ import { EventEmitter } from "events";
 import { Server } from "ws";
 import { getLogger } from "log4js";
 import { MeasurementSample } from "../messageClasses/RPLidar_pb";
-import { TrackedPoint2D } from "tether-agent";
+import { TrackedPoint2D, Vector2D } from "tether-agent";
 
 const logger = getLogger("lidar-consolidation-agent");
 
 export const WebSocketMessageType = Object.freeze({
   LIDAR_UPDATE: "lidarUpdate",
+  TRANSFORMED_LIDAR_UPDATE: "transformedLidarUpdate",
   CONSOLIDATION_UPDATE: "consolidationUpdate",
 });
 
@@ -17,12 +18,18 @@ export type LidarScanMessage = {
   samples: MeasurementSample.AsObject[];
 };
 
+export type TransformedLidarScanMessage = {
+  type: string;
+  serial: number;
+  samples: Vector2D.AsObject[];
+};
+
 export type ConsolidationMessage = {
   type: string;
   points: TrackedPoint2D.AsObject[];
 };
 
-export type BroadcastMessage = LidarScanMessage | ConsolidationMessage;
+export type BroadcastMessage = LidarScanMessage | TransformedLidarScanMessage | ConsolidationMessage;
 
 export default class WebSocketServer extends EventEmitter {
   private isRunning: Boolean = false;
@@ -66,11 +73,25 @@ export default class WebSocketServer extends EventEmitter {
   broadcast = (message: BroadcastMessage) => {
     switch (message.type) {
       case WebSocketMessageType.LIDAR_UPDATE: {
-        const src: LidarScanMessage = message as LidarScanMessage;
+        const src = message as LidarScanMessage;
         // Lidar update messages are identified by serial
         const overridable = this.pendingBroadcastMessages.find(m => (
           m.type === message.type
           && (m as LidarScanMessage).serial === src.serial
+        ));
+        if (overridable) {
+          this.replaceMessage(overridable, message);
+        } else {
+          this.pendingBroadcastMessages.push(message);
+        }
+      }
+      break;
+      case WebSocketMessageType.TRANSFORMED_LIDAR_UPDATE: {
+        const src = message as TransformedLidarScanMessage;
+        // Lidar update messages are identified by serial
+        const overridable = this.pendingBroadcastMessages.find(m => (
+          m.type === message.type
+          && (m as TransformedLidarScanMessage).serial === src.serial
         ));
         if (overridable) {
           this.replaceMessage(overridable, message);
@@ -107,7 +128,6 @@ export default class WebSocketServer extends EventEmitter {
     while (this.pendingBroadcastMessages.length) {
       const message = this.pendingBroadcastMessages.shift();
       const json = JSON.stringify(message);
-      logger.debug("Broadcasting message:", json);
       this.server.clients.forEach(client => {
         client.send(json);
       });

@@ -2,7 +2,12 @@ const agentsDefaults = {
   agentType: "lidar-consolidation-agent",
   loglevel: "info",
   userPlugs: [
-    // in-flowing plugs are dynamically generated based on the `numLidars` config  value
+    {
+      name: "Scan",
+      flow: "in",
+      plugType: "stream",
+      schemaPath: "RPLidar.proto:rplidar.Scan"
+    },
     {
       name: "Points",
       flow: "out",

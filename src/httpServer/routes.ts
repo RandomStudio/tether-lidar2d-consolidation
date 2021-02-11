@@ -9,7 +9,7 @@ const logger = getLogger("lidar-consolidation-agent");
 export const router = express.Router();
 
 router.get("/api/config", (req, res) => {
-  const { host, httpPort, wsPort} = store.getState();
+  const { host, httpPort, wsPort } = store.getState();
   res.json({ host, httpPort, wsPort });
 });
 
