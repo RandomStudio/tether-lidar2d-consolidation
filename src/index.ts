@@ -3,7 +3,7 @@ import parseConfig from "parse-strings-in-object";
 import { getLogger } from "log4js";
 import convert from "color-convert";
 
-import { TetherAgent, BaseAgentConfig, TrackedPoints2D, TrackedPoint2D, Vector2D } from "tether-agent";
+import { TetherAgent, BaseAgentConfig, TrackedPoints2D, TrackedPoint2D, Vector2D, PlugDefinition } from "tether-agent";
 import Plug from "tether-agent/dist/Plug";
 import { MessageProperties } from "amqplib";
 
@@ -36,7 +36,18 @@ class LidarConsolidationAgent extends TetherAgent {
   private wsServer: WebSocketServer;
 
   constructor() {
-    super(agentDefaults);
+    super({
+      ...agentDefaults,
+      userPlugs: [
+        ...agentDefaults.userPlugs,
+        ...(new Array(localConfig.numLidars).fill(0).map((_, index) => ({
+          name: `Lidar${index + 1}`,
+          flow: "in",
+          plugType: "stream",
+          schemaPath: "RPLidar.proto:rplidar.Scan"
+        } as PlugDefinition)))
+      ]
+    });
 
     logger.debug("Tether agent launched with config", localConfig);
 
@@ -64,9 +75,11 @@ class LidarConsolidationAgent extends TetherAgent {
         FileIO.save(lidars, localConfig.lidarConfigPath);
       });
 
-    this.registerMessageHandler("Scan", (message: Scan, properties: MessageProperties) => {
-      this.onScanReceived(message, properties);
-    });
+    for (let i = 1; i <= localConfig.numLidars; i += 1) {
+      this.registerMessageHandler(`Lidar${i}`, (message: Scan, properties: MessageProperties) => {
+        this.onScanReceived(message, properties);
+      });
+    }
 
     this.getActivatedPlug("Points").then(plug => {
       this.outPlug = plug;

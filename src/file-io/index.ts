@@ -19,7 +19,6 @@ export default class FileIO {
         }
         try {
           const json = JSON.parse(data.toString());
-          logger.debug(`Loaded config:`, json);
           resolve(json);
         } catch (parseError) {
           logger.error("Parse JSON from file error:", parseError);
