@@ -20,6 +20,7 @@ class App extends React.Component {
       pointSize: 2,
       scale: 0.2,
       fadeSpeed: 0.06,
+      consolidationAlpha: 1.0,
       socketState: null,
       busy: false,
       error: null,
@@ -154,6 +155,10 @@ class App extends React.Component {
   onSetFadeSpeed = (value) => {
     this.setState({ fadeSpeed: value });
   }
+  
+  onSetConsolidationAlpha = (value) => {
+    this.setState({ consolidationAlpha: value });
+  }
 
   onSave = (serial) => {
     const { lidars } = this.state;
@@ -228,6 +233,7 @@ class App extends React.Component {
       pointSize,
       scale,
       fadeSpeed,
+      consolidationAlpha,
       socketState,
       busy,
       error
@@ -250,18 +256,21 @@ class App extends React.Component {
         <Consolidation
           points={consolidatedPoints}
           scale={scale}
+          alpha={consolidationAlpha}
         />
         <Controls
           lidars={lidars}
           pointSize={pointSize}
           scale={scale}
           fadeSpeed={fadeSpeed}
+          consolidationAlpha={consolidationAlpha}
           onSetRotation={this.onSetRotation}
           onSetTranslation={this.onSetTranslation}
           onSetColor={this.onSetColor}
           onSetPointSize={this.onSetPointSize}
           onSetScale={this.onSetScale}
           onSetFadeSpeed={this.onSetFadeSpeed}
+          onSetConsolidationAlpha={this.onSetConsolidationAlpha}
           onSave={this.onSave}
         />
         {socketState !== SocketState.OPEN

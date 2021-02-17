@@ -4,7 +4,7 @@ import './index.scss';
 
 const TWO_PI = 2 * Math.PI;
 
-const Consolidation = ({ points, scale }) => {
+const Consolidation = ({ points, scale, alpha }) => {
   const width = 512;
   const height = 512;
   const canvasEl = useRef(null);
@@ -33,7 +33,7 @@ const Consolidation = ({ points, scale }) => {
 
   return (
     <div className="consolidation">
-      <canvas ref={canvasEl} width={width} height={height} />
+      <canvas ref={canvasEl} width={width} height={height} style={{ filter: `opacity(${alpha})` }} />
     </div>
   );
 };
@@ -48,11 +48,13 @@ Consolidation.propTypes = {
     })
   })),
   scale: PropTypes.number,
+  alpha: PropTypes.number,
 };
 
 Consolidation.defaultProps = {
   points: [],
   scale: 1,
+  alpha: 1,
 };
 
 export default Consolidation;

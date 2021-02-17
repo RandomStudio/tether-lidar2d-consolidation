@@ -9,12 +9,14 @@ const Controls = ({
   pointSize,
   scale,
   fadeSpeed,
+  consolidationAlpha,
   onSetRotation,
   onSetTranslation,
   onSetColor,
   onSetPointSize,
   onSetScale,
   onSetFadeSpeed,
+  onSetConsolidationAlpha,
   onSave,
 }) => {
   const [selectedSerial, onSelectLidar] = useState(null);
@@ -27,7 +29,12 @@ const Controls = ({
       >
         <option value="-">Select a lidar sensor</option>
         {lidars.map((l, i) => (
-          <option key={i} value={l.serial}>{l.serial}</option>
+          <option
+            key={i}
+            value={l.serial}
+          >
+            {l.serial}
+          </option>
         ))}
       </select>
       {lidar && (
@@ -126,6 +133,14 @@ const Controls = ({
         precision={3}
         onChange={onSetFadeSpeed}
       />
+      <Row
+        label="Result alpha"
+        min={0}
+        max={1}
+        value={consolidationAlpha}
+        precision={3}
+        onChange={onSetConsolidationAlpha}
+      />
     </div>
   );
 };
@@ -141,12 +156,14 @@ Controls.propTypes = {
   pointSize: PropTypes.number.isRequired,
   scale: PropTypes.number.isRequired,
   fadeSpeed: PropTypes.number.isRequired,
+  consolidationAlpha: PropTypes.number.isRequired,
   onSetRotation: PropTypes.func.isRequired,
   onSetTranslation: PropTypes.func.isRequired,
   onSetColor: PropTypes.func.isRequired,
   onSetPointSize: PropTypes.func.isRequired,
   onSetScale: PropTypes.func.isRequired,
   onSetFadeSpeed: PropTypes.func.isRequired,
+  onSetConsolidationAlpha: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
 };
 
