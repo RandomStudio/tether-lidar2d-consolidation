@@ -1,5 +1,6 @@
 export interface LidarConfig {
   serial: string;
+  name: string;
   rotation: number;
   x: number;
   y: number;

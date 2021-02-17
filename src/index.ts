@@ -103,6 +103,7 @@ class LidarConsolidationAgent extends TetherAgent {
       // register new lidar with its serial number
       store.dispatch(addLidar({
         serial,
+        name: serial,
         rotation: 0,
         x: 0,
         y: 0,

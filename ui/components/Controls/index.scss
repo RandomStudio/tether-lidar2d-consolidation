@@ -14,7 +14,7 @@
     margin-bottom: 1em;
   }
 
-  .row {
+  .row, .row-lidar-name {
     width: 100%;
     padding: 0.25em 0;
     box-sizing: border-box;
@@ -31,7 +31,7 @@
     }
 
     > .value {
-      width: 4em;
+      width: 5em;
       @include flex-row;
       > input {
         width: 100%;

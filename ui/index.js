@@ -102,6 +102,19 @@ class App extends React.Component {
     }
   }
 
+  onSetName = (serial, value) => {
+    // update state
+    const { lidars } = this.state;
+    this.setState({
+      lidars: lidars.map(l => ({
+        ...l,
+        name: l.serial === serial
+          ? value
+          : l.name
+      }))
+    });
+  }
+
   onSetRotation = (serial, value) => {
     // update state
     const { lidars } = this.state;
@@ -164,7 +177,7 @@ class App extends React.Component {
     const { lidars } = this.state;
     const lidar = lidars.find(l => l.serial === serial);
     if (lidar) {
-      const { rotation, x, y, color } = lidar;
+      const { name, rotation, x, y, color } = lidar;
       this.fetchURL(
         '/api/lidar',
         {
@@ -174,6 +187,7 @@ class App extends React.Component {
           },
           body: JSON.stringify({
             serial,
+            name,
             rotation,
             x,
             y,
@@ -264,6 +278,7 @@ class App extends React.Component {
           scale={scale}
           fadeSpeed={fadeSpeed}
           consolidationAlpha={consolidationAlpha}
+          onSetName={this.onSetName}
           onSetRotation={this.onSetRotation}
           onSetTranslation={this.onSetTranslation}
           onSetColor={this.onSetColor}

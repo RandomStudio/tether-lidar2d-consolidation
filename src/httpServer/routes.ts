@@ -2,7 +2,7 @@ import express from "express";
 import { getLogger } from "log4js";
 import FileIO from "../file-io";
 import store from "../redux";
-import { setLidarRotation, setLidarTranslation, setLidarColor } from "../redux/actions";
+import { setLidarRotation, setLidarTranslation, setLidarColor, setLidarName } from "../redux/actions";
 
 const logger = getLogger("lidar-consolidation-agent");
 
@@ -19,14 +19,28 @@ router.get("/api/lidars/all", (req, res) => {
 });
 
 router.post("/api/lidar", async (req, res) => {
-  const { serial, rotation, x, y, color } = req.body;
-  logger.info(`PUT /api/lidar`, serial, rotation, x, y, color);
+  const { serial, name, rotation, x, y, color } = req.body;
+  logger.info(`PUT /api/lidar`, serial, name, rotation, x, y, color);
   const lidar = store.getState().lidars.find(l => l.serial === serial);
   if (lidar) {
+    store.dispatch(setLidarName(serial, name));
     store.dispatch(setLidarRotation(serial, rotation));
     store.dispatch(setLidarTranslation(serial, x, y));
     const [ r, g, b ] = color;
     store.dispatch(setLidarColor(serial, r, g, b));
+    const { lidars } = store.getState();
+    await FileIO.save(lidars, store.getState().lidarConfigPath);
+    res.sendStatus(200);
+  } else {
+    res.sendStatus(404);
+  }
+});
+
+router.put("/api/lidar/name", async (req, res) => {
+  const { serial, name } = req.body;
+  const lidar = store.getState().lidars.find(l => l.serial === serial);
+  if (lidar) {
+    store.dispatch(setLidarName(serial, name));
     const { lidars } = store.getState();
     await FileIO.save(lidars, store.getState().lidarConfigPath);
     res.sendStatus(200);

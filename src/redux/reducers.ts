@@ -34,6 +34,18 @@ export const rootReducer = (
         ]
       };
     }
+    case ActionType.SET_LIDAR_NAME: {
+      const { serial, name } = action;
+      return {
+        ...state,
+        lidars: state.lidars.map(l => ({
+          ...l,
+          name: l.serial === serial
+            ? name
+            : l.name
+        }))
+      };
+    }
     case ActionType.SET_LIDAR_ROTATION: {
       const { serial, rotation } = action;
       return {

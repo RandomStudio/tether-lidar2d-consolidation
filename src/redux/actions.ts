@@ -3,6 +3,7 @@ import { LidarConfig, StoreState } from "./types";
 export const ActionType = Object.freeze({
   INIT_STORE: "init_store",
   ADD_LIDAR: "add_lidar",
+  SET_LIDAR_NAME: "set_lidar_name",
   SET_LIDAR_ROTATION: "set_lidar_rotation",
   SET_LIDAR_TRANSLATION: "set_lidar_translation",
   SET_LIDAR_COLOR: "set_lidar_color"
@@ -16,6 +17,12 @@ export const initStore = (config: StoreState) => ({
 export const addLidar = (config: LidarConfig) => ({
   type: ActionType.ADD_LIDAR,
   config
+});
+
+export const setLidarName = (serial: string, name: String) => ({
+  type: ActionType.SET_LIDAR_NAME,
+  serial,
+  name
 });
 
 export const setLidarRotation = (serial: string, rotation: number) => ({
