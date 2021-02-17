@@ -1,5 +1,5 @@
 {
-  "version": "0.5.12",
+  "version": "0.5.13",
   "name": "lidar-consolidation-agent",
   "description": "NodeJS Tether agent that receives and consolidates data from lidar agents",
   "author": "",
