@@ -1,26 +1,10 @@
 # Lidar Consolidation Agent
 This is a generic Tether agent for consolidation of scan data from multiple lidar sensors.  
-It expects to receive `RPLidar.proto:rplidar.Scan` messages from one or more lidar sensors, and will apply DBSCAN clustering to find groups of points that belong to distinct elements.  
+It expects to receive "scan" messages from one or more lidar sensors, and will apply DBSCAN clustering to find groups of points that belong to distinct elements.  
 ## Plugs
-The following plugs are available on this agent:
-```
-name: Lidar{num}
-flow: in
-plugType: stream
-schemaPath: RPLidar.proto:rplidar.Scan
-```
-This plug is generated dynamically based on the `numLidars` configuration (see below). For each expected lidar, this plug type if instantiated, where `{num}` is replaced with a 1-based index. I.e. with `numLidars` set to `2`, in-flowing plugs will be created with names `Lidar1` and `Lidar2`.  
-Route the output from RPLidar agents (`Scan` or `FilteredScan` plugs) to these.
-```
-name: Points
-flow: out
-plugType: stream
-schemaPath: Tracking.proto:tether.tracking.TrackedPoints2D  
-```
-This plug will emit the results from clustering analysis on the received lidar scan data.
+TODO
 ## Calibration
-A web interface is available for visualization of scan data and clustering results, as well as updating lidar configuration data, such as rotation and translation.  
-To calibrate these configuration settings, route from the lidar agents' `Scan` (rather than `FilteredScan`) plugs to the consolidation agent's `Scan` plug. This will show all of the lidar's scan points, disregarding its background subtraction, which will help with calibration.   
+TODO
 ## Setup
 Install dependencies with:  
 ```
@@ -32,6 +16,8 @@ Build the agent with:
 npm run build
 ```
 ## Command line arguments
+**TODO: some of the args below may change:**
+
 After building, you can run the agent with the following command line arguments:  
 - `loglevel`: the global log level, defaults to `info`.
 - `numLidars`: the number of lidars that are expected (and allowed) to send data to this agent. Defaults to `1`.
