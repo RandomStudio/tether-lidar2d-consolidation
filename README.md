@@ -11,7 +11,7 @@ Install dependencies with:
 npm install
 ```
   
-Build the agent with:  
+Build the agent with:   
 ```
 npm run build
 ```
