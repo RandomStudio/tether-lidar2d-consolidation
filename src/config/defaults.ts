@@ -1,7 +1,8 @@
 import path from "path";
-import { LocalConfig } from "./types";
+import { Config } from "./types";
 
-const localDefaults: LocalConfig = {
+const defaults: Config = {
+  agentType: "lidar-consolidation-agent",
   loglevel: "info",
   numLidars: 1,
   lidarConfigPath: path.resolve(__dirname, "..", "..", "dist", "lidars.json"),
@@ -12,4 +13,4 @@ const localDefaults: LocalConfig = {
   minNeighbours: 3,
 };
 
-export default localDefaults;
+export default defaults;

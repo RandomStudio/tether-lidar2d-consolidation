@@ -1,12 +1,8 @@
-import { LogLevel } from "tether-agent";
-
-export interface LocalConfig {
-  loglevel: LogLevel;
+export interface Config {
+  agentType: string;
+  loglevel: string;
   numLidars: number;
   lidarConfigPath: string;
-  host: string;
-  httpPort: number;
-  wsPort: number;
   maxNeighbourDistance: number;
   minNeighbours: number;
 }

@@ -1,5 +1,6 @@
 import fs from "fs";
 import { getLogger } from "log4js";
+import { LidarConfig } from "../redux/types";
 
 const logger = getLogger("lidar-consolidation-agent");
 
@@ -9,7 +10,7 @@ export default class FileIO {
   /**
    * Loads the contents of the config file and returns the contents, parsed as JSON.
    */
-  public static load = (path: string): Promise<object> => (
+  public static load = (path: string): Promise<LidarConfig[]> =>
     new Promise((resolve, reject) => {
       logger.info(`Loading config from path "${path}"`);
       fs.readFile(path, (err, data) => {
@@ -25,22 +26,21 @@ export default class FileIO {
           reject(parseError);
         }
       });
-    })
-  );
+    });
 
   /**
    * Persist current config data to a file.
    */
-  public static save = async (data: object, path: string): Promise<void> => (
+  public static save = async (data: object, path: string): Promise<void> =>
     new Promise((resolve, reject) => {
-      if (FileIO.isWritingToFile) { // only write if required and allowed
+      if (FileIO.isWritingToFile) {
+        // only write if required and allowed
         reject("A save is already in progress");
-      }
-      else {
+      } else {
         logger.debug(`Persisting config to file ${path}`);
         FileIO.isWritingToFile = true; // prevent additional write actions
         FileIO.writeToFile(data, path) // persist to file
-          .catch(err => {
+          .catch((err) => {
             logger.error(`Could not write config data.`, err);
             reject(err);
           })
@@ -49,15 +49,14 @@ export default class FileIO {
             resolve();
           });
       }
-    })
-  )
+    });
 
   /**
    * fs.writeFile, wrapped in a promise
-   * @param state 
-   * @param path 
+   * @param state
+   * @param path
    */
-  private static writeToFile = (data: object, path: string): Promise<void> => (
+  private static writeToFile = (data: object, path: string): Promise<void> =>
     new Promise((resolve, reject) => {
       fs.writeFile(path, JSON.stringify(data, null, "\t"), {}, (err) => {
         if (err) {
@@ -66,7 +65,5 @@ export default class FileIO {
           resolve();
         }
       });
-    })
-  );
-
+    });
 }

@@ -1,4 +1,4 @@
-# Lidar Consolidation Agent
+# Lidar2D Consolidation Agent
 This is a generic Tether agent for consolidation of scan data from multiple lidar sensors.  
 It expects to receive "scan" messages from one or more lidar sensors, and will apply DBSCAN clustering to find groups of points that belong to distinct elements.  
 ## Plugs

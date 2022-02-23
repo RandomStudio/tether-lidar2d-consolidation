@@ -8,9 +8,9 @@ export interface LidarConfig {
 }
 
 export interface StoreState {
-  host: string;
-  httpPort: number;
-  wsPort: number;
+  // host: string;
+  // httpPort: number;
+  // wsPort: number;
   lidarConfigPath: string;
   lidars: LidarConfig[];
-};
+}
