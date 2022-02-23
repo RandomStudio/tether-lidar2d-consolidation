@@ -1,8 +1,13 @@
-import { Vector2D } from "tether-agent";
-import { MeasurementSample } from "../messageClasses/RPLidar_pb";
+import { ScanSample } from "..";
 
+export interface Point2D {
+  x: number;
+  y: number;
+}
 export interface ScanData {
-  lidarSerial: string;
-  samples: MeasurementSample.AsObject[];
-  transformedSamples?: Vector2D.AsObject[];
+  // lidarSerial: string;
+  // samples: MeasurementSample.AsObject[];
+  samples: ScanSample[];
+  // transformedSamples?: Vector2D.AsObject[];
+  transformedSamples: Point2D[];
 }

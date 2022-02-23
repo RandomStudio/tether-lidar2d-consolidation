@@ -3,7 +3,7 @@ import parseConfig from "parse-strings-in-object";
 import { getLogger } from "log4js";
 import convert from "color-convert";
 
-import { TetherAgent, Input, Output, parseAgentID } from "@tether/tether-agent";
+import { TetherAgent, Output, parseAgentID } from "@tether/tether-agent";
 
 import defaults from "./config/defaults";
 
@@ -12,24 +12,29 @@ import FileIO from "./file-io";
 import { addLidar, initStore } from "./redux/actions";
 import Consolidator from "./consolidator";
 
-import HTTPServer from "./httpServer";
-import WebSocketServer, { WebSocketMessageType } from "./webSocketServer";
 import { defaultState } from "./redux/reducers";
 import { Config } from "./config/types";
-import { decode } from "@msgpack/msgpack";
+import { decode, encode } from "@msgpack/msgpack";
 
 const config: Config = parseConfig(rc("Lidar2DConsolidationAgent", defaults));
 
 const logger = getLogger("Lidar2DConsolidationAgent");
 logger.level = config.loglevel;
 
-interface Scan {
+export interface ScanSample {
   quality: number;
   angle: number;
   distance: number;
 }
 
-type ScanMessage = Scan[];
+export type ScanMessage = ScanSample[];
+
+export interface TrackedPoint2D {
+  id: number;
+  size?: number;
+  x: number;
+  y: number;
+}
 
 const main = async () => {
   const agent = await TetherAgent.create(config.agentType);
@@ -68,7 +73,7 @@ const main = async () => {
 };
 
 const onScanReceived = (
-  message: ScanMessage,
+  samples: ScanSample[],
   serial: string,
   outPlug: Output,
   consolidator: Consolidator
@@ -98,14 +103,11 @@ const onScanReceived = (
 
   // retrieve lidar samples from the message
   logger.debug(
-    `${message.length} scan samples received from lidar with serial ${serial}`
+    `${samples.length} scan samples received from lidar with serial ${serial}`
   );
 
   // determine positions of "non-background" objects based on received lidar points
-  consolidator.setScanData({
-    lidarSerial: serial,
-    message,
-  });
+  consolidator.setScanData(serial, samples);
 
   // // send lidar samples to connected UI instances
   // this.wsServer.broadcast({
@@ -115,10 +117,13 @@ const onScanReceived = (
   // });
 
   const points = consolidator.findPoints(
-    consolidator.getCombinedTransformedSamples(),
+    consolidator.getCombinedTransformedPoints(),
     config.maxNeighbourDistance,
     config.minNeighbours
   );
+
+  const trackedPoints = encode(points);
+  outPlug.publish(trackedPoints);
 
   // // broadcast consolidated points to connected UI instances
   // this.wsServer.broadcast({
@@ -128,19 +133,19 @@ const onScanReceived = (
 
   // send out consolidated points to Tether agents
   // const msg = outPlug.getMessageInstance();
-  msg.setPointsList(
-    points.map((p) => {
-      const point = new TrackedPoint2D();
-      point.setId(p.id);
-      point.setSize(p.size);
-      const pos = new Vector2D();
-      pos.setX(p.position.x);
-      pos.setY(p.position.y);
-      point.setPosition(pos);
-      return point;
-    })
-  );
-  outPlug.sendMessage(msg);
+  // msg.setPointsList(
+  //   points.map((p) => {
+  //     const point = new TrackedPoint2D();
+  //     point.setId(p.id);
+  //     point.setSize(p.size);
+  //     const pos = new Vector2D();
+  //     pos.setX(p.position.x);
+  //     pos.setY(p.position.y);
+  //     point.setPosition(pos);
+  //     return point;
+  //   })
+  // );
+  // outPlug.sendMessage(msg);
 };
 
 // const  onShutdown= (code: string) =>{
