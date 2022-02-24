@@ -37,7 +37,7 @@ export interface TrackedPoint2D {
 }
 
 const main = async () => {
-  const agent = await TetherAgent.create(config.agentType);
+  const agent = await TetherAgent.create(config.agentType, config.tether);
 
   const consolidator = new Consolidator();
   // const wsServer: WebSocketServer;
@@ -63,7 +63,7 @@ const main = async () => {
   }
   const outPlug = agent.createOutput("TrackedPoints2D");
 
-  const plug = agent.createInput(`lidar`);
+  const plug = agent.createInput(`scan`);
 
   plug.onMessage((payload, topic) => {
     const message = decode(payload) as ScanMessage;
