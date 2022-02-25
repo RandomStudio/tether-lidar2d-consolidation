@@ -1,13 +1,12 @@
 import Clustering from "density-clustering";
-import { getLogger } from "log4js";
 import { ScanSample, TrackedPoint2D } from "..";
 import store from "../redux";
 import { Point2D, ScanData } from "./types";
 
-const logger = getLogger("lidar-consolidation-agent");
+import {logger }from ".."
 
 export default class Consolidator {
-  private dbscan: typeof Clustering.DBSCAN;
+  private dbscan: Clustering.DBSCAN;
   private scans: Map<string, ScanData> = new Map<string, ScanData>();
 
   constructor() {

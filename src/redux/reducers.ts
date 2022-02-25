@@ -7,7 +7,7 @@ export const defaultState: StoreState = {
   lidars: [],
 };
 
-export const rootReducer = (state = defaultState, action) => {
+export const rootReducer = (state = defaultState, action): StoreState => {
   switch (action.type) {
     case ActionType.INIT_STORE: {
       const { config } = action;

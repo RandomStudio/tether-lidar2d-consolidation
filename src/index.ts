@@ -18,8 +18,9 @@ import { decode, encode } from "@msgpack/msgpack";
 
 const config: Config = parseConfig(rc("Lidar2DConsolidationAgent", defaults));
 
-const logger = getLogger("Lidar2DConsolidationAgent");
+export const logger = getLogger("Lidar2DConsolidationAgent");
 logger.level = config.loglevel;
+
 
 export interface ScanSample {
   quality: number;
@@ -70,6 +71,17 @@ const main = async () => {
     const serial = parseAgentID(topic);
     onScanReceived(message, serial, outPlug, consolidator);
   });
+
+  const requestConfigInput = agent.createInput("requestLidarConfig");
+  const requestConfigOutput = agent.createOutput("provideLidarConfig");
+  requestConfigInput.onMessage(() => {
+    // These messages have empty body
+    const lidars = store.getState().lidars;
+    console.log("config requested; sending", lidars);
+    const m = encode(lidars);
+
+    requestConfigOutput.publish(m);
+  })
 };
 
 const onScanReceived = (

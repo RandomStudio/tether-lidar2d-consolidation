@@ -45,3 +45,4 @@ export const setLidarColor = (serial: string, r: number, g: number, b: number) =
   g,
   b
 });
+

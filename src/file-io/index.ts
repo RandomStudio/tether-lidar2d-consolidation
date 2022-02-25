@@ -1,8 +1,7 @@
 import fs from "fs";
-import { getLogger } from "log4js";
+import { logger } from "..";
 import { LidarConfig } from "../redux/types";
 
-const logger = getLogger("lidar-consolidation-agent");
 
 export default class FileIO {
   private static isWritingToFile: boolean = false;
