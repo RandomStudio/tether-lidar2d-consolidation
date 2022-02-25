@@ -9,12 +9,20 @@ import defaults from "./config/defaults";
 
 import store from "./redux";
 import FileIO from "./file-io";
-import { addLidar, initStore } from "./redux/actions";
+import {
+  addLidar,
+  initStore,
+  setLidarColor,
+  setLidarName,
+  setLidarRotation,
+  setLidarTranslation,
+} from "./redux/actions";
 import Consolidator from "./consolidator";
 
 import { defaultState } from "./redux/reducers";
 import { Config } from "./config/types";
 import { decode, encode } from "@msgpack/msgpack";
+import { LidarConfig } from "./redux/types";
 
 const config: Config = parseConfig(rc("Lidar2DConsolidationAgent", defaults));
 
@@ -80,6 +88,26 @@ const main = async () => {
     const m = encode(lidars);
 
     requestConfigOutput.publish(m);
+  });
+
+  const saveConfigInput = agent.createInput("saveLidarConfig");
+  saveConfigInput.onMessage(async (payload) => {
+    const lidarConfig = decode(payload) as LidarConfig;
+    console.log("Received Lidar config to save:", lidarConfig);
+    const { serial, name, rotation, x, y, color } = lidarConfig;
+
+    const lidar = store.getState().lidars.find((l) => l.serial === serial);
+    if (lidar) {
+      store.dispatch(setLidarName(serial, name));
+      store.dispatch(setLidarRotation(serial, rotation));
+      store.dispatch(setLidarTranslation(serial, x, y));
+      const [r, g, b] = color;
+      store.dispatch(setLidarColor(serial, r, g, b));
+      const { lidars } = store.getState();
+      await FileIO.save(lidars, store.getState().lidarConfigPath);
+    } else {
+      console.error("Could not match LIDAR by serial number", serial);
+    }
   });
 };
 
