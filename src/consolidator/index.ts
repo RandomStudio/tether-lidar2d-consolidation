@@ -3,7 +3,7 @@ import { ScanSample, TrackedPoint2D } from "..";
 import store from "../redux";
 import { Point2D, ScanData } from "./types";
 
-import {logger }from ".."
+import { logger } from "..";
 
 export default class Consolidator {
   private dbscan: Clustering.DBSCAN;
@@ -62,7 +62,8 @@ export default class Consolidator {
   public findPoints = (
     points: Point2D[],
     neighbourhoodRadius: number,
-    minNeighbours: number
+    minNeighbours: number,
+    maxClusterSize?: number
   ): TrackedPoint2D[] => {
     // analyze scan samples to form clusters
     const clusters = this.dbscan.run(
@@ -75,7 +76,7 @@ export default class Consolidator {
     );
 
     // translate clusters into consolidated points
-    return clusters.map((cluster, index) => {
+    const clusterPoints = clusters.map((cluster, index) => {
       // filter out the samples that belong in this cluster
       const relevantSamples = points.reduce(
         (filtered, scan, i) =>
@@ -85,6 +86,10 @@ export default class Consolidator {
       // consolidate the set of samples in the cluster into a tracked point
       return this.consolidateCluster(index, relevantSamples);
     });
+
+    return maxClusterSize !== undefined
+      ? clusterPoints.filter((p) => p.size < maxClusterSize)
+      : clusterPoints;
   };
 
   /**
@@ -105,7 +110,6 @@ export default class Consolidator {
       .map((s) => {
         const { angle, distance } = s;
         return {
-          ...s,
           x: x + Math.cos(Math.PI * ((angle + rotation) / 180)) * distance,
           y: y + Math.sin(Math.PI * ((angle + rotation) / 180)) * distance,
         };
@@ -123,16 +127,16 @@ export default class Consolidator {
     // get the bounding box for the samples in this cluster
     const combined = points.reduce(
       ({ minX, maxX, minY, maxY }, point) => ({
-        minX: Math.min(minX, point.x),
-        maxX: Math.max(maxX, point.x),
-        minY: Math.min(minY, point.y),
-        maxY: Math.max(maxY, point.y),
+        minX: minX === null ? point.x : Math.min(minX, point.x),
+        maxX: maxY === null ? point.x : Math.max(maxX, point.x),
+        minY: minY === null ? point.y : Math.min(minY, point.y),
+        maxY: maxY === null ? point.y : Math.max(maxY, point.y),
       }),
       {
-        minX: Number.MAX_VALUE,
-        maxX: Number.MIN_VALUE,
-        minY: Number.MAX_VALUE,
-        maxY: Number.MIN_VALUE,
+        minX: null,
+        maxX: null,
+        minY: null,
+        maxY: null,
       }
     );
 

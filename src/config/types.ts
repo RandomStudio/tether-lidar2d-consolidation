@@ -9,5 +9,6 @@ export interface Config {
   clustering: {
     neighbourhoodRadius: number;
     minNeighbours: number;
+    maxClusterSize?: number;
   }
 }

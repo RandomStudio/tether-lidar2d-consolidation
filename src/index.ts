@@ -21,7 +21,6 @@ const config: Config = parseConfig(rc("Lidar2DConsolidationAgent", defaults));
 export const logger = getLogger("Lidar2DConsolidationAgent");
 logger.level = config.loglevel;
 
-
 export interface ScanSample {
   quality: number;
   angle: number;
@@ -62,14 +61,14 @@ const main = async () => {
     const { lidars } = store.getState();
     FileIO.save(lidars, config.lidarConfigPath);
   }
-  const outPlug = agent.createOutput("TrackedPoints2D");
+  const consolidatedOutput = agent.createOutput("TrackedPoints2D");
 
-  const plug = agent.createInput(`scan`);
+  const scansInput = agent.createInput(`scan`);
 
-  plug.onMessage((payload, topic) => {
+  scansInput.onMessage((payload, topic) => {
     const message = decode(payload) as ScanMessage;
     const serial = parseAgentID(topic);
-    onScanReceived(message, serial, outPlug, consolidator);
+    onScanReceived(message, serial, consolidatedOutput, consolidator);
   });
 
   const requestConfigInput = agent.createInput("requestLidarConfig");
@@ -81,7 +80,7 @@ const main = async () => {
     const m = encode(lidars);
 
     requestConfigOutput.publish(m);
-  })
+  });
 };
 
 const onScanReceived = (
@@ -128,10 +127,17 @@ const onScanReceived = (
   //   samples
   // });
 
+  const {
+    neighbourhoodRadius,
+    minNeighbours,
+    maxClusterSize,
+  } = config.clustering;
+
   const points = consolidator.findPoints(
     consolidator.getCombinedTransformedPoints(),
-    config.clustering.neighbourhoodRadius,
-    config.clustering.minNeighbours
+    neighbourhoodRadius,
+    minNeighbours,
+    maxClusterSize
   );
 
   const trackedPoints = encode(points);
