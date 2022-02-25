@@ -61,13 +61,13 @@ export default class Consolidator {
 
   public findPoints = (
     points: Point2D[],
-    maxNeighbourDistance: number,
+    neighbourhoodRadius: number,
     minNeighbours: number
   ): TrackedPoint2D[] => {
     // analyze scan samples to form clusters
     const clusters = this.dbscan.run(
       points.map((s) => [s.x, s.y]),
-      maxNeighbourDistance,
+      neighbourhoodRadius,
       minNeighbours
     );
     logger.debug(

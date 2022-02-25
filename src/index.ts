@@ -130,8 +130,8 @@ const onScanReceived = (
 
   const points = consolidator.findPoints(
     consolidator.getCombinedTransformedPoints(),
-    config.maxNeighbourDistance,
-    config.minNeighbours
+    config.clustering.neighbourhoodRadius,
+    config.clustering.minNeighbours
   );
 
   const trackedPoints = encode(points);

@@ -6,6 +6,8 @@ export interface Config {
   loglevel: string;
   numLidars: number;
   lidarConfigPath: string;
-  maxNeighbourDistance: number;
-  minNeighbours: number;
+  clustering: {
+    neighbourhoodRadius: number;
+    minNeighbours: number;
+  }
 }
