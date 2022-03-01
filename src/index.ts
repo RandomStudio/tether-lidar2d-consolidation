@@ -148,12 +148,6 @@ const onScanReceived = (
   // determine positions of "non-background" objects based on received lidar points
   consolidator.setScanData(serial, samples);
 
-  // // send lidar samples to connected UI instances
-  // this.wsServer.broadcast({
-  //   type: WebSocketMessageType.LIDAR_UPDATE,
-  //   serial,
-  //   samples
-  // });
 
   const {
     neighbourhoodRadius,
@@ -171,34 +165,5 @@ const onScanReceived = (
   const trackedPoints = encode(points);
   outPlug.publish(trackedPoints);
 
-  // // broadcast consolidated points to connected UI instances
-  // this.wsServer.broadcast({
-  //   type: WebSocketMessageType.CONSOLIDATION_UPDATE,
-  //   points
-  // });
-
-  // send out consolidated points to Tether agents
-  // const msg = outPlug.getMessageInstance();
-  // msg.setPointsList(
-  //   points.map((p) => {
-  //     const point = new TrackedPoint2D();
-  //     point.setId(p.id);
-  //     point.setSize(p.size);
-  //     const pos = new Vector2D();
-  //     pos.setX(p.position.x);
-  //     pos.setY(p.position.y);
-  //     point.setPosition(pos);
-  //     return point;
-  //   })
-  // );
-  // outPlug.sendMessage(msg);
-};
-
-// const  onShutdown= (code: string) =>{
-//   // perform cleanup actions
-//   this.outPlug = null;
-//   await this.uiServer.stop();
-//   return this.wsServer.stop();
-// }
 
 main();
