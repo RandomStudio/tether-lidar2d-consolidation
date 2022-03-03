@@ -24,6 +24,7 @@ import {
   loadStore,
   setColor,
   setName,
+  setROI,
   setRotation,
   setTranslation,
 } from "./redux/rootSlice";
@@ -76,7 +77,7 @@ const main = async () => {
     const lidarConfig = decode(payload) as LidarConsolidatedConfig;
     console.log("Received Lidar config to save:", lidarConfig);
 
-    const { devices } = lidarConfig;
+    const { devices, regionOfInterest } = lidarConfig;
     devices.forEach((d) => {
       const { serial, name, rotation, x, y, color } = d;
 
@@ -93,6 +94,8 @@ const main = async () => {
         throw Error("Could not match LIDAR by serial number " + serial);
       }
     });
+
+    store.dispatch(setROI(regionOfInterest));
 
     // Also save entire config (devices and any regionOfInterest, to disk)
     await FileIO.save(store.getState().config, config.lidarConfigPath);

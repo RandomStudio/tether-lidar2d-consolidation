@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
+  CornerPoint,
   LidarConsolidatedConfig,
   LidarDeviceConfig,
 } from "../consolidator/types";
@@ -54,6 +55,9 @@ export const rootSlice = createSlice({
       const device = state.config.devices.find((d) => d.serial === serial);
       device.color = [r, g, b];
     },
+    setROI: (state, action: PayloadAction<CornerPoint[]>) => {
+      state.config.regionOfInterest = action.payload;
+    },
   },
 });
 
@@ -64,6 +68,7 @@ export const {
   setTranslation,
   setColor,
   loadStore,
+  setROI,
 } = rootSlice.actions;
 
 export default rootSlice.reducer;
