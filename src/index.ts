@@ -148,7 +148,6 @@ const onScanReceived = (
   // determine positions of "non-background" objects based on received lidar points
   consolidator.setScanData(serial, samples);
 
-
   const {
     neighbourhoodRadius,
     minNeighbours,
@@ -164,6 +163,6 @@ const onScanReceived = (
 
   const trackedPoints = encode(points);
   outPlug.publish(trackedPoints);
-
+};
 
 main();
