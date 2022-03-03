@@ -52,7 +52,7 @@ const main = async () => {
     // store.dispatch(initStore(defaultState));
     FileIO.save(store.getState().config, config.lidarConfigPath);
   }
-  const consolidatedOutput = agent.createOutput("TrackedPoints2D");
+  const consolidatedOutput = agent.createOutput("clusters");
 
   const scansInput = agent.createInput(`scan`);
   scansInput.onMessage((payload, topic) => {
