@@ -12,14 +12,22 @@ export interface LidarDeviceConfig {
   color: number[];
 }
 
+export enum CornerIndex {
+  topLeft = 0,
+  topRight,
+  bottomRight,
+  bottomLeft,
+}
+
+export interface CornerPoint {
+  corner: CornerIndex;
+  x: number;
+  y: number;
+}
+
 export interface LidarConsolidatedConfig {
   devices: LidarDeviceConfig[];
-  regionOfInterest?: {
-    topLeft: [number, number];
-    topRight: [number, number];
-    bottomRight: [number, number];
-    bottomLeft: [number, number];
-  };
+  regionOfInterest?: CornerPoint[];
 }
 
 export interface ScanData {

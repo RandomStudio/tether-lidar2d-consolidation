@@ -35,11 +35,16 @@ export default class FileIO {
   ): Promise<void> => {
     if (FileIO.isWritingToFile) {
       // only write if required and allowed
-      throw Error("A save is already in progress");
+      // throw Error("A save is already in progress");
+      logger.warn("busy; trying again...");
+      setTimeout(() => {
+        this.save(data, path);
+      }, 1000);
     } else {
       logger.debug(`Persisting config to file ${path}`);
       FileIO.isWritingToFile = true; // prevent additional write actions
       await fs.writeFile(path, JSON.stringify(data, null, "\t"), {});
+      logger.info("Saved OK");
       FileIO.isWritingToFile = false; // allow new write actions
     }
   };

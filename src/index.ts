@@ -9,24 +9,24 @@ import defaults from "./config/defaults";
 
 import store from "./redux";
 import FileIO from "./file-io";
-import {
-  addLidar,
-  initStore,
-  setLidarColor,
-  setLidarName,
-  setLidarRotation,
-  setLidarTranslation,
-} from "./redux/actions";
+
 import Consolidator from "./consolidator";
 
-import { defaultState } from "./redux/reducers";
 import { Config } from "./config/types";
 import { decode, encode } from "@msgpack/msgpack";
 import {
-  LidarDeviceConfig,
+  LidarConsolidatedConfig,
   ScanMessage,
   ScanSample,
 } from "./consolidator/types";
+import {
+  addDevice,
+  loadStore,
+  setColor,
+  setName,
+  setRotation,
+  setTranslation,
+} from "./redux/rootSlice";
 
 const config: Config = parseConfig(rc("Lidar2DConsolidationAgent", defaults));
 
@@ -43,17 +43,12 @@ const main = async () => {
     // load lidar transformations from external file
     const lidarConsolidatedConfig = await FileIO.load(config.lidarConfigPath);
     logger.info("Loaded config:", lidarConsolidatedConfig);
-    store.dispatch(
-      initStore({
-        config: lidarConsolidatedConfig,
-      })
-    );
+    store.dispatch(loadStore(lidarConsolidatedConfig));
   } catch (err) {
-    // TODO: is this an error or expected behaviour? logger.warn, then?
-    logger.error(
+    logger.warn(
       `Could not load config file, saving default config to new file.`
     );
-    store.dispatch(initStore(defaultState));
+    // store.dispatch(initStore(defaultState));
     FileIO.save(store.getState().config, config.lidarConfigPath);
   }
   const consolidatedOutput = agent.createOutput("TrackedPoints2D");
@@ -78,23 +73,29 @@ const main = async () => {
 
   const saveConfigInput = agent.createInput("saveLidarConfig");
   saveConfigInput.onMessage(async (payload) => {
-    const lidarConfig = decode(payload) as LidarDeviceConfig;
+    const lidarConfig = decode(payload) as LidarConsolidatedConfig;
     console.log("Received Lidar config to save:", lidarConfig);
-    const { serial, name, rotation, x, y, color } = lidarConfig;
 
-    const device = store
-      .getState()
-      .config.devices.find((l) => l.serial === serial);
-    if (device) {
-      store.dispatch(setLidarName(serial, name));
-      store.dispatch(setLidarRotation(serial, rotation));
-      store.dispatch(setLidarTranslation(serial, x, y));
-      const [r, g, b] = color;
-      store.dispatch(setLidarColor(serial, r, g, b));
-      await FileIO.save(store.getState().config, config.lidarConfigPath);
-    } else {
-      console.error("Could not match LIDAR by serial number", serial);
-    }
+    const { devices } = lidarConfig;
+    devices.forEach((d) => {
+      const { serial, name, rotation, x, y, color } = d;
+
+      const device = store
+        .getState()
+        .config.devices.find((l) => l.serial === serial);
+      if (device) {
+        store.dispatch(setName({ serial, name }));
+        store.dispatch(setRotation({ serial, rotation }));
+        store.dispatch(setTranslation({ serial, x, y }));
+        const [r, g, b] = color;
+        store.dispatch(setColor({ serial, r, g, b }));
+      } else {
+        throw Error("Could not match LIDAR by serial number " + serial);
+      }
+    });
+
+    // Also save entire config (devices and any regionOfInterest, to disk)
+    await FileIO.save(store.getState().config, config.lidarConfigPath);
   });
 };
 
@@ -114,7 +115,7 @@ const onScanReceived = (
     );
     // Register new lidar with its serial number
     store.dispatch(
-      addLidar({
+      addDevice({
         serial,
         name: serial,
         rotation: 0,

@@ -8,7 +8,13 @@ const defaults: Config = {
   agentType: "lidarConsolidation",
   loglevel: "info",
   numLidars: 1,
-  lidarConfigPath: path.resolve(__dirname, "..", "..", "dist", "lidars.json"),
+  lidarConfigPath: path.resolve(
+    __dirname,
+    "..",
+    "..",
+    "dist",
+    "consolidationConfig.json"
+  ),
   clustering: {
     neighbourhoodRadius: 200,
     minNeighbours: 3,
