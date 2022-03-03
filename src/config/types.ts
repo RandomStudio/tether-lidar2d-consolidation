@@ -10,5 +10,9 @@ export interface Config {
     neighbourhoodRadius: number;
     minNeighbours: number;
     maxClusterSize?: number;
-  }
+  };
+  perspectiveTransform: {
+    ignoreOutside: boolean;
+    ignoreOutsideMargin: number;
+  };
 }

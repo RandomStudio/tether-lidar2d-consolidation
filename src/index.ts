@@ -28,6 +28,7 @@ import {
   setRotation,
   setTranslation,
 } from "./redux/rootSlice";
+import PerspectiveTransformer from "./Transformer/Transformer";
 
 const config: Config = parseConfig(rc("Lidar2DConsolidationAgent", defaults));
 
@@ -38,7 +39,6 @@ const main = async () => {
   const agent = await TetherAgent.create(config.agentType, config.tether);
 
   const consolidator = new Consolidator();
-  // const wsServer: WebSocketServer;
 
   try {
     // load lidar transformations from external file
@@ -49,16 +49,30 @@ const main = async () => {
     logger.warn(
       `Could not load config file, saving default config to new file.`
     );
-    // store.dispatch(initStore(defaultState));
     FileIO.save(store.getState().config, config.lidarConfigPath);
   }
-  const consolidatedOutput = agent.createOutput("clusters");
+
+  const clusterOutput = agent.createOutput("clusters");
+  const trackingOutput = agent.createOutput("trackedPoints");
+
+  const transformer = new PerspectiveTransformer();
+  const { regionOfInterest } = store.getState().config;
+  if (regionOfInterest.length === 4) {
+    transformer.setCorners(regionOfInterest);
+  }
 
   const scansInput = agent.createInput(`scan`);
   scansInput.onMessage((payload, topic) => {
     const message = decode(payload) as ScanMessage;
     const serial = parseAgentID(topic);
-    onScanReceived(message, serial, consolidatedOutput, consolidator);
+    onScanReceived(
+      message,
+      serial,
+      consolidator,
+      transformer,
+      clusterOutput,
+      trackingOutput
+    );
   });
 
   const requestConfigInput = agent.createInput("requestLidarConfig");
@@ -97,6 +111,8 @@ const main = async () => {
 
     store.dispatch(setROI(regionOfInterest));
 
+    transformer.setCorners(regionOfInterest);
+
     // Also save entire config (devices and any regionOfInterest, to disk)
     await FileIO.save(store.getState().config, config.lidarConfigPath);
   });
@@ -105,15 +121,17 @@ const main = async () => {
 const onScanReceived = (
   samples: ScanSample[],
   serial: string,
-  outPlug: Output,
-  consolidator: Consolidator
+  consolidator: Consolidator,
+  transformer: PerspectiveTransformer,
+  clustersPlug: Output,
+  trackingPlug: Output
 ) => {
   // Check if this LIDAR has been added to State
   const existingDevice = store
     .getState()
     .config.devices.find((l) => l.serial === serial);
   if (!existingDevice) {
-    logger.info(
+    logger.warn(
       `Found unregistered lidar agent with serial ${serial}. Adding new config.`
     );
     // Register new lidar with its serial number
@@ -133,7 +151,7 @@ const onScanReceived = (
   }
 
   // retrieve lidar samples from the message
-  logger.debug(
+  logger.trace(
     `${samples.length} scan samples received from lidar with serial ${serial}`
   );
 
@@ -153,8 +171,13 @@ const onScanReceived = (
     maxClusterSize
   );
 
-  const trackedPoints = encode(points);
-  outPlug.publish(trackedPoints);
+  const clusters = encode(points);
+  clustersPlug.publish(clusters);
+
+  if (transformer && transformer.isReady()) {
+    const trackingPoints = transformer.transform(points);
+    trackingPlug.publish(encode(trackingPoints));
+  }
 };
 
 main();

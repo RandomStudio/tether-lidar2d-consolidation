@@ -49,12 +49,12 @@ export default class Consolidator {
         lidar.x,
         lidar.y
       );
-      logger.debug(
+      logger.trace(
         `Created ${transformedSamples.length} transformed samples from scan of size ${samples.length}`
       );
       this.scans.set(serial, { samples, transformedSamples });
     } else {
-      logger.debug(
+      logger.warn(
         `Scan data supplied for lidar with unrecognized serial ${serial}`
       );
     }
@@ -72,7 +72,7 @@ export default class Consolidator {
       neighbourhoodRadius,
       minNeighbours
     );
-    logger.debug(
+    logger.trace(
       `Found ${clusters.length} clusters in ${points.length} sampled points`
     );
 
