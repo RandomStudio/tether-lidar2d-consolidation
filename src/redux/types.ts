@@ -1,6 +1,6 @@
-import { LidarConfig } from "../consolidator/types";
+import { LidarDeviceConfig } from "../consolidator/types";
 
 export interface StoreState {
   lidarConfigPath: string;
-  lidars: LidarConfig[];
+  lidars: LidarDeviceConfig[];
 }

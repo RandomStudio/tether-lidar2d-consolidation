@@ -22,27 +22,16 @@ import Consolidator from "./consolidator";
 import { defaultState } from "./redux/reducers";
 import { Config } from "./config/types";
 import { decode, encode } from "@msgpack/msgpack";
-import { LidarConfig } from "./redux/types";
+import {
+  LidarDeviceConfig,
+  ScanMessage,
+  ScanSample,
+} from "./consolidator/types";
 
 const config: Config = parseConfig(rc("Lidar2DConsolidationAgent", defaults));
 
 export const logger = getLogger("Lidar2DConsolidationAgent");
 logger.level = config.loglevel;
-
-export interface ScanSample {
-  quality: number;
-  angle: number;
-  distance: number;
-}
-
-export type ScanMessage = ScanSample[];
-
-export interface TrackedPoint2D {
-  id: number;
-  size?: number;
-  x: number;
-  y: number;
-}
 
 const main = async () => {
   const agent = await TetherAgent.create(config.agentType, config.tether);
@@ -92,7 +81,7 @@ const main = async () => {
 
   const saveConfigInput = agent.createInput("saveLidarConfig");
   saveConfigInput.onMessage(async (payload) => {
-    const lidarConfig = decode(payload) as LidarConfig;
+    const lidarConfig = decode(payload) as LidarDeviceConfig;
     console.log("Received Lidar config to save:", lidarConfig);
     const { serial, name, rotation, x, y, color } = lidarConfig;
 

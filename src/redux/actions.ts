@@ -1,4 +1,5 @@
-import { LidarConfig, StoreState } from "./types";
+import { LidarDeviceConfig } from "../consolidator/types";
+import { StoreState } from "./types";
 
 export const ActionType = Object.freeze({
   INIT_STORE: "init_store",
@@ -6,43 +7,47 @@ export const ActionType = Object.freeze({
   SET_LIDAR_NAME: "set_lidar_name",
   SET_LIDAR_ROTATION: "set_lidar_rotation",
   SET_LIDAR_TRANSLATION: "set_lidar_translation",
-  SET_LIDAR_COLOR: "set_lidar_color"
+  SET_LIDAR_COLOR: "set_lidar_color",
 });
 
 export const initStore = (config: StoreState) => ({
   type: ActionType.INIT_STORE,
-  config
+  config,
 });
 
-export const addLidar = (config: LidarConfig) => ({
+export const addLidar = (config: LidarDeviceConfig) => ({
   type: ActionType.ADD_LIDAR,
-  config
+  config,
 });
 
 export const setLidarName = (serial: string, name: String) => ({
   type: ActionType.SET_LIDAR_NAME,
   serial,
-  name
+  name,
 });
 
 export const setLidarRotation = (serial: string, rotation: number) => ({
   type: ActionType.SET_LIDAR_ROTATION,
   serial,
-  rotation
+  rotation,
 });
 
 export const setLidarTranslation = (serial: string, x: number, y: number) => ({
   type: ActionType.SET_LIDAR_TRANSLATION,
   serial,
   x,
-  y
+  y,
 });
 
-export const setLidarColor = (serial: string, r: number, g: number, b: number) => ({
+export const setLidarColor = (
+  serial: string,
+  r: number,
+  g: number,
+  b: number
+) => ({
   type: ActionType.SET_LIDAR_COLOR,
   serial,
   r,
   g,
-  b
+  b,
 });
-

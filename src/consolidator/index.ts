@@ -1,7 +1,6 @@
 import Clustering from "density-clustering";
-import { ScanSample, TrackedPoint2D } from "..";
 import store from "../redux";
-import { Point2D, ScanData } from "./types";
+import { Point2D, ScanData, ScanSample, TrackedPoint2D } from "./types";
 
 import { logger } from "..";
 
