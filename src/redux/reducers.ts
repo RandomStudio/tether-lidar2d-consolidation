@@ -1,10 +1,10 @@
-import path from "path";
 import { ActionType } from "./actions";
 import { StoreState } from "./types";
 
 export const defaultState: StoreState = {
-  lidarConfigPath: path.resolve(__dirname, "..", "..", "dist", "lidars.json"),
-  lidars: [],
+  config: {
+    devices: [],
+  },
 };
 
 export const rootReducer = (state = defaultState, action): StoreState => {
@@ -20,53 +20,63 @@ export const rootReducer = (state = defaultState, action): StoreState => {
       const { config } = action;
       return {
         ...state,
-        lidars: [
-          ...state.lidars,
-          {
-            ...config,
-          },
-        ],
+        config: {
+          ...config,
+          devices: [...state.config.devices],
+        },
       };
     }
     case ActionType.SET_LIDAR_NAME: {
       const { serial, name } = action;
       return {
         ...state,
-        lidars: state.lidars.map((l) => ({
-          ...l,
-          name: l.serial === serial ? name : l.name,
-        })),
+        config: {
+          ...state.config,
+          devices: state.config.devices.map((l) => ({
+            ...l,
+            name: l.serial === serial ? name : l.name,
+          })),
+        },
       };
     }
     case ActionType.SET_LIDAR_ROTATION: {
       const { serial, rotation } = action;
       return {
         ...state,
-        lidars: state.lidars.map((l) => ({
-          ...l,
-          rotation: l.serial === serial ? rotation : l.rotation,
-        })),
+        config: {
+          ...state.config,
+          devices: state.config.devices.map((l) => ({
+            ...l,
+            rotation: l.serial === serial ? rotation : l.rotation,
+          })),
+        },
       };
     }
     case ActionType.SET_LIDAR_TRANSLATION: {
       const { serial, x, y } = action;
       return {
         ...state,
-        lidars: state.lidars.map((l) => ({
-          ...l,
-          x: l.serial === serial ? x : l.x,
-          y: l.serial === serial ? y : l.y,
-        })),
+        config: {
+          ...state.config,
+          devices: state.config.devices.map((l) => ({
+            ...l,
+            x: l.serial === serial ? x : l.x,
+            y: l.serial === serial ? y : l.y,
+          })),
+        },
       };
     }
     case ActionType.SET_LIDAR_COLOR: {
       const { serial, r, g, b } = action;
       return {
         ...state,
-        lidars: state.lidars.map((l) => ({
-          ...l,
-          color: l.serial === serial ? [r, g, b] : l.color,
-        })),
+        config: {
+          ...state.config,
+          devices: state.config.devices.map((l) => ({
+            ...l,
+            color: l.serial === serial ? [r, g, b] : l.color,
+          })),
+        },
       };
     }
     default:

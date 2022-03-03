@@ -41,12 +41,11 @@ const main = async () => {
 
   try {
     // load lidar transformations from external file
-    const lidarConfig = await FileIO.load(config.lidarConfigPath);
-    logger.info("Loaded config:", lidarConfig);
+    const lidarConsolidatedConfig = await FileIO.load(config.lidarConfigPath);
+    logger.info("Loaded config:", lidarConsolidatedConfig);
     store.dispatch(
       initStore({
-        lidars: lidarConfig,
-        lidarConfigPath: config.lidarConfigPath,
+        config: lidarConsolidatedConfig,
       })
     );
   } catch (err) {
@@ -55,13 +54,11 @@ const main = async () => {
       `Could not load config file, saving default config to new file.`
     );
     store.dispatch(initStore(defaultState));
-    const { lidars } = store.getState();
-    FileIO.save(lidars, config.lidarConfigPath);
+    FileIO.save(store.getState().config, config.lidarConfigPath);
   }
   const consolidatedOutput = agent.createOutput("TrackedPoints2D");
 
   const scansInput = agent.createInput(`scan`);
-
   scansInput.onMessage((payload, topic) => {
     const message = decode(payload) as ScanMessage;
     const serial = parseAgentID(topic);
@@ -72,10 +69,10 @@ const main = async () => {
   const requestConfigOutput = agent.createOutput("provideLidarConfig");
   requestConfigInput.onMessage(() => {
     // These messages have empty body
-    const lidars = store.getState().lidars;
-    console.log("config requested; sending", lidars);
-    const m = encode(lidars);
-
+    const config = store.getState().config;
+    console.log("config requested; sending", config);
+    const m = encode(config);
+    // Reply with config saved in state
     requestConfigOutput.publish(m);
   });
 
@@ -85,15 +82,16 @@ const main = async () => {
     console.log("Received Lidar config to save:", lidarConfig);
     const { serial, name, rotation, x, y, color } = lidarConfig;
 
-    const lidar = store.getState().lidars.find((l) => l.serial === serial);
-    if (lidar) {
+    const device = store
+      .getState()
+      .config.devices.find((l) => l.serial === serial);
+    if (device) {
       store.dispatch(setLidarName(serial, name));
       store.dispatch(setLidarRotation(serial, rotation));
       store.dispatch(setLidarTranslation(serial, x, y));
       const [r, g, b] = color;
       store.dispatch(setLidarColor(serial, r, g, b));
-      const { lidars } = store.getState();
-      await FileIO.save(lidars, store.getState().lidarConfigPath);
+      await FileIO.save(store.getState().config, config.lidarConfigPath);
     } else {
       console.error("Could not match LIDAR by serial number", serial);
     }
@@ -106,15 +104,15 @@ const onScanReceived = (
   outPlug: Output,
   consolidator: Consolidator
 ) => {
-  // make sure that each connected lidar is registered in the config file
-
-  // TODO: store needs to have proper typing for state!
-  const lidarConfig = store.getState().lidars.find((l) => l.serial === serial);
-  if (!lidarConfig) {
+  // Check if this LIDAR has been added to State
+  const existingDevice = store
+    .getState()
+    .config.devices.find((l) => l.serial === serial);
+  if (!existingDevice) {
     logger.info(
       `Found unregistered lidar agent with serial ${serial}. Adding new config.`
     );
-    // register new lidar with its serial number
+    // Register new lidar with its serial number
     store.dispatch(
       addLidar({
         serial,
@@ -125,8 +123,9 @@ const onScanReceived = (
         color: convert.hsv.rgb(Math.round(Math.random() * 360), 100, 100), // assign random color
       })
     );
-    const { lidars } = store.getState();
-    FileIO.save(lidars, config.lidarConfigPath);
+
+    // Also save to disk
+    FileIO.save(store.getState().config, config.lidarConfigPath);
   }
 
   // retrieve lidar samples from the message

@@ -22,9 +22,9 @@ export default class Consolidator {
 
   public getCombinedTransformedPoints = (): Point2D[] => {
     let combined: Point2D[] = [];
-    const { lidars } = store.getState();
+    const { devices } = store.getState().config;
     for (const [serial, scan] of this.scans) {
-      const lidar = lidars.find((l) => l.serial === serial);
+      const lidar = devices.find((l) => l.serial === serial);
       if (lidar && scan.transformedSamples) {
         combined = [...combined, ...scan.transformedSamples];
       }
@@ -38,7 +38,9 @@ export default class Consolidator {
    */
   public setScanData = (serial: string, samples: ScanSample[]) => {
     // only add scan data for known lidars
-    const lidar = store.getState().lidars.find((l) => l.serial === serial);
+    const lidar = store
+      .getState()
+      .config.devices.find((l) => l.serial === serial);
     if (lidar) {
       // apply transformation from lidar settings
       const transformedSamples = this.transformScanSamples(

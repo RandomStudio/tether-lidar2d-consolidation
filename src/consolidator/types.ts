@@ -14,7 +14,7 @@ export interface LidarDeviceConfig {
 
 export interface LidarConsolidatedConfig {
   devices: LidarDeviceConfig[];
-  regionOfInterest: {
+  regionOfInterest?: {
     topLeft: [number, number];
     topRight: [number, number];
     bottomRight: [number, number];
