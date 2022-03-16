@@ -16,7 +16,7 @@ const defaults: Config = {
     "consolidationConfig.json"
   ),
   clustering: {
-    neighbourhoodRadius: 200,
+    neighbourhoodRadius: 300,
     minNeighbours: 3,
     maxClusterSize: 2500,
   },

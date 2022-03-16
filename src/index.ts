@@ -57,7 +57,7 @@ const main = async () => {
 
   const transformer = new PerspectiveTransformer();
   const { regionOfInterest } = store.getState().config;
-  if (regionOfInterest.length === 4) {
+  if (regionOfInterest !== undefined && regionOfInterest.length === 4) {
     transformer.setCorners(regionOfInterest);
   }
 
