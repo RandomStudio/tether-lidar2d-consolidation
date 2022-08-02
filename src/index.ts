@@ -80,7 +80,8 @@ const main = async () => {
   requestConfigInput.onMessage(() => {
     // These messages have empty body
     const config = store.getState().config;
-    console.log("config requested; sending", config);
+    logger.info("client requested config");
+    logger.debug("sending", config);
     const m = encode(config);
     // Reply with config saved in state
     requestConfigOutput.publish(m);
@@ -89,7 +90,7 @@ const main = async () => {
   const saveConfigInput = agent.createInput("saveLidarConfig");
   saveConfigInput.onMessage(async (payload) => {
     const lidarConfig = decode(payload) as LidarConsolidatedConfig;
-    console.log("Received Lidar config to save:", lidarConfig);
+    logger.debug("Received Lidar config to save:", lidarConfig);
 
     const { devices, regionOfInterest } = lidarConfig;
     devices.forEach((d) => {
