@@ -159,6 +159,8 @@ const onScanReceived = (
   // determine positions of "non-background" objects based on received lidar points
   consolidator.setScanData(serial, samples);
 
+  // logger.trace({ serial, samples });
+
   const {
     neighbourhoodRadius,
     minNeighbours,
@@ -173,10 +175,15 @@ const onScanReceived = (
   );
 
   const clusters = encode(points);
-  clustersPlug.publish(clusters);
+  setTimeout(() => {
+    clustersPlug.publish(clusters);
+  });
+
+  // logger.trace({ clusters });
 
   if (transformer && transformer.isReady()) {
     const trackingPoints = transformer.transform(points);
+    logger.trace({ trackingPoints });
     trackingPlug.publish(encode(trackingPoints));
   }
 };

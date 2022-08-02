@@ -36,9 +36,9 @@ export interface ScanData {
 }
 
 export interface ScanSample {
-  quality: number;
-  angle: number;
-  distance: number;
+  quality?: number; // not required
+  angle: number; // expected to be in degrees
+  distance: number; // expected to be in mm
 }
 
 export type ScanMessage = ScanSample[];
