@@ -108,6 +108,7 @@ export default class Consolidator {
   ): Point2D[] =>
     samples
       .filter((s) => s.quality === undefined || s.quality > 0)
+      .filter((s) => s.distance > 0)
       .map((s) => {
         const { angle, distance } = s;
         return {

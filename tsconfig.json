@@ -6,10 +6,10 @@
     "moduleResolution": "node",
     "sourceMap": true,
     "outDir": "dist",
-    "declaration": true,
-    "noUnusedLocals": true
+    "declaration": true
+    // "noUnusedLocals": true
   },
   "include": ["src/**/*"],
   "exclude": ["src/**/*.test.*"],
-  "lib": ["es2015"]
+  "lib": ["es6"]
 }
