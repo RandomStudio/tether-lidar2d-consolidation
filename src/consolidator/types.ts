@@ -35,11 +35,7 @@ export interface ScanData {
   transformedSamples: Point2D[];
 }
 
-export interface ScanSample {
-  quality?: number; // not required
-  angle: number; // expected to be in degrees
-  distance: number; // expected to be in mm
-}
+export type ScanSample = [number, number, number]; // [0] = angle, [1] = distance, [2?] = quality
 
 export type ScanMessage = ScanSample[];
 

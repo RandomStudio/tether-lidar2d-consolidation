@@ -112,7 +112,9 @@ const main = async () => {
 
     store.dispatch(setROI(regionOfInterest));
 
-    transformer.setCorners(regionOfInterest);
+    if (regionOfInterest) {
+      transformer.setCorners(regionOfInterest);
+    }
 
     // Also save entire config (devices and any regionOfInterest, to disk)
     await FileIO.save(store.getState().config, config.lidarConfigPath);
