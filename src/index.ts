@@ -61,7 +61,7 @@ const main = async () => {
     transformer.setCorners(regionOfInterest);
   }
 
-  const scansInput = agent.createInput(`scan`);
+  const scansInput = agent.createInput(`scans`);
   scansInput.onMessage((payload, topic) => {
     const message = decode(payload) as ScanMessage;
     const serial = parseAgentIdOrGroup(topic);
