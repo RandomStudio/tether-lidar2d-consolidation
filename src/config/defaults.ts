@@ -5,7 +5,7 @@ const defaults: Config = {
   tether: {
     host: "localhost",
   },
-  agentType: "lidarConsolidation",
+  agentType: "LidarConsolidation",
   loglevel: "info",
   numLidars: 1,
   lidarConfigPath: path.resolve(
