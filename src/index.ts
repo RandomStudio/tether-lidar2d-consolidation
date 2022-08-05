@@ -3,7 +3,7 @@ import parseConfig from "parse-strings-in-object";
 import { getLogger } from "log4js";
 import convert from "color-convert";
 
-import { TetherAgent, Output, parseAgentID } from "@tether/tether-agent";
+import { TetherAgent, Output, parseAgentIdOrGroup } from "@tether/tether-agent";
 
 import defaults from "./config/defaults";
 
@@ -64,7 +64,7 @@ const main = async () => {
   const scansInput = agent.createInput(`scan`);
   scansInput.onMessage((payload, topic) => {
     const message = decode(payload) as ScanMessage;
-    const serial = parseAgentID(topic);
+    const serial = parseAgentIdOrGroup(topic);
     onScanReceived(
       message,
       serial,
