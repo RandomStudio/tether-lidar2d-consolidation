@@ -27,21 +27,15 @@ channels:
     subscribe:
       $ref: "#/components/channels/clusters/subscribe"
 
-components:
-  messages:
-    scans:
-      name: scan
-      title: Scan Frames
-      summary: Distances measurements from each Scan Frame
-      payload:
-        $ref: "#/components/schemas/scanPayload"
-    clusters:
-      name: cluster
-      title: List of clusters
-      summary: 2D points with non-normalised position, and including a size (radius). Not typically suitable for final tracking data, but may be useful for configuration, troubleshooting and debugging.
-      payload:
-        $ref: "#/components/schemas/clusterPayload"
+  lidar2d/{agentIdOrGroup}/trackedPoints:
+    description:
+      $ref: "#/components/channels/trackedPoints/description"
+    parameters:
+      $ref: "#/components/channels/trackedPoints/parameters"
+    subscribe:
+      $ref: "#/components/channels/trackedPoints/subscribe"
 
+components:
   channels:
     scans:
       description: A single "scan" frame, i.e. measurements taken after 360 degrees of rotation.
@@ -66,9 +60,47 @@ components:
         summary: Outplug Plug for clusters
         message:
           $ref: "#/components/messages/clusters"
+      publish:
+        summary: Input Plug for clusters
+        message:
+          $ref: "#/components/messages/clusters"
+
+    trackedPoints:
+      description: Valid tracking points that are normalised within the range [0,1] for both X and Y axes, within the "region of interest" (ROI) defined in the agent's configuration.
+      parameters:
+        agentIdOrGroup:
+          $ref: "https://raw.githubusercontent.com/RandomStudio/tether/asyncapi/tether.yml#/components/parameters/agentIdOrGroup"
+      publish:
+        summary: Input Plug for trackedPoints
+        message:
+          $ref: "#/components/messages/scans"
+      subscribe:
+        summary: Output Plug for trackedPoints
+        message:
+          $ref: "#/components/messages/trackedPoints"
+
+  messages:
+    scans:
+      name: scans
+      title: Scan Frames
+      summary: Distance measurements from each Scan Frame
+      payload:
+        $ref: "#/components/schemas/scansPayload"
+    clusters:
+      name: clusters
+      title: List of clusters
+      summary: 2D points with non-normalised position, and including a size (radius). Not typically suitable for final tracking data, but may be useful for configuration, troubleshooting and debugging.
+      payload:
+        $ref: "#/components/schemas/trackedPointsPayload"
+    trackedPoints:
+      name: trackedPoints
+      title: 2D Tracked Points
+      summary: Normalised tracked points within the ROI
+      payload:
+        $ref: "#/components/schemas/trackedPointsPayload"
 
   schemas:
-    scanPayload:
+    scansPayload:
       type: array
       items:
         type: array
@@ -94,7 +126,7 @@ components:
               maximum: 1
               description: Quality of measurement sample, from 0 (should ignore) to 1 (as reliable as possible)
 
-    clusterPayload:
+    trackedPointsPayload:
       type: array
       items:
         type: object
