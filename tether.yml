@@ -43,6 +43,14 @@ channels:
     subscribe:
       $ref: "#/components/channels/provideLidarConfig/subscribe"
 
+  lidarConsolidation/{agentIdOrGroup}/requestLidarConfig:
+    description:
+      $ref: "#/components/channels/requestLidarConfig/description"
+    parameters:
+      $ref: "#/components/channels/requestLidarConfig/parameters"
+    publish:
+      $ref: "#/components/channels/requestLidarConfig/subscribe"
+
 components:
   channels:
     scans:
@@ -103,6 +111,20 @@ components:
         message:
           $ref: "#/components/messages/provideLidarConfig"
 
+    requestLidarConfig:
+      description: Ping any and all Lidar Consolidator Agents to send their currently-saved configuration via provideLidarConfig. The body of the message is expected to be empty.
+      parameters:
+        agentIdOrGroup:
+          $ref: "https://raw.githubusercontent.com/RandomStudio/tether/asyncapi/tether.yml#/components/parameters/agentIdOrGroup"
+      publish:
+        summary: Input Plug for requestLidarConfig
+        message:
+          $ref: "#/components/messages/requestLidarConfig"
+      subscribe:
+        summary: Output Plug for requestLidarConfig
+        message:
+          $ref: "#/components/messages/requestLidarConfig"
+
   messages:
     scans:
       name: scans
@@ -129,6 +151,12 @@ components:
       summary: Information and configuration for all devices known to the consolidator to align scan data. Also the single ROI currently defined for tracking.
       payload:
         $ref: "#/components/schemas/lidarConfigPayload"
+
+    requestLidarConfig:
+      name: requestLidarConfig
+      title: Request Lidar Config
+      summary: Empty body; contents will be ignored
+      payload: {}
 
   schemas:
     scansPayload:
