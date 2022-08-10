@@ -99,7 +99,7 @@ components:
       publish:
         summary: Input Plug for trackedPoints
         message:
-          $ref: "#/components/messages/scans"
+          $ref: "#/components/messages/trackedPoints"
       subscribe:
         summary: Output Plug for trackedPoints
         message:
