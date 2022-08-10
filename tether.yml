@@ -157,12 +157,14 @@ components:
       summary: Distance measurements from each Scan Frame
       payload:
         $ref: "#/components/schemas/scansPayload"
+
     clusters:
       name: clusters
       title: List of clusters
       summary: 2D points with non-normalised position, and including a size (radius). Not typically suitable for final tracking data, but may be useful for configuration, troubleshooting and debugging.
       payload:
         $ref: "#/components/schemas/trackedPointsPayload"
+
     trackedPoints:
       name: trackedPoints
       title: 2D Tracked Points
