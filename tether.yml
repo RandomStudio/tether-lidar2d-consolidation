@@ -3,10 +3,10 @@ info:
   title: Tether Lidar2D Consolidation Agent
   version: "1.0.0"
   description: |
-    An Agent that converts raw scan data (angles and distance measurements) and converts these to 2D points, rather like a "point cloud" but on a flat 2D plane. It then applies a clustering algorithm to these points to produce a much smaller number of "tracking points" which are made available to other agents.
+    An Agent that converts raw scan data (angles and distance measurements) and converts these to a "map" of 2D points, rather like a "point cloud" but on a flat 2D plane. It then applies a clustering algorithm to these points to produce a much smaller number of "tracking points" which are made available to other agents.
 
 servers:
-  $ref: "https://raw.githubusercontent.com/RandomStudio/tether/feature/federated-asyncapi/tether.yml#/components/servers"
+  $ref: "https://raw.githubusercontent.com/RandomStudio/tether/asyncapi/tether.yml#/components/servers"
 
 defaultContentType: application/msgpack
 
@@ -15,8 +15,8 @@ channels:
     description: A single "scan" frame, i.e. measurements taken after 360 degrees of rotation.
     parameters:
       agentIdOrGroup:
-        $ref: "https://raw.githubusercontent.com/RandomStudio/tether/feature/federated-asyncapi/tether.yml#/components/parameters/agentIdOrGroup"
-    subscribe:
+        $ref: "https://raw.githubusercontent.com/RandomStudio/tether/asyncapi/tether.yml#/components/parameters/agentIdOrGroup"
+    publish:
       summary: Collect distance measurements where each complete message represents a complete "scan" or single revolution of the spinning LIDAR
       message:
         $ref: "#/components/messages/scans"
