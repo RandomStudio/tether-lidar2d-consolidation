@@ -5,11 +5,11 @@ It expects to receive "scan" messages from one or more lidar sensors, and will a
 
 ## Plugs
 
-TODO
+See [AsyncAPI YAML](./tether.yml)
 
 ## Calibration
 
-TODO
+Use https://github.com/RandomStudio/tether-tracking-viz to view and save configuration/calibration for your setup.
 
 ## Setup
 
