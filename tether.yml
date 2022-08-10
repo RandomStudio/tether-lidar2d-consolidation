@@ -218,23 +218,7 @@ components:
               description: Quality of measurement sample, from 0 (should ignore) to 1 (as reliable as possible)
 
     trackedPointsPayload:
-      type: array
-      items:
-        type: object
-        required:
-          - id
-          - x
-          - y
-        properties:
-          id:
-            type: number
-            description: Index number of tracked point. In the case of "raw" tracked points from the Lidar Consolidator, these are not guaranteed to be consistent between frames, but for tether-smooth-tracking, they should be.
-          x:
-            type: number
-          y:
-            type: number
-          size:
-            type: number
+      $ref: "https://raw.githubusercontent.com/RandomStudio/tether/asyncapi/tether.yml#/components/schemas/trackedPoints2d"
 
     lidarConfigPayload:
       type: array
