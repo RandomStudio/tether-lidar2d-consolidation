@@ -49,7 +49,7 @@ channels:
     parameters:
       $ref: "#/components/channels/requestLidarConfig/parameters"
     publish:
-      $ref: "#/components/channels/requestLidarConfig/subscribe"
+      $ref: "#/components/channels/requestLidarConfig/publish"
 
   "{agentType}/{agentIdOrGroup}/saveLidarConfig":
     description:
@@ -120,7 +120,7 @@ components:
           $ref: "#/components/messages/provideLidarConfig"
 
     requestLidarConfig:
-      description: Ping any and all Lidar Consolidator Agents to send their currently-saved configuration via provideLidarConfig. The body of the message is expected to be empty.
+      description: Ping the Lidar Consolidator Agent to send their currently-saved configuration via provideLidarConfig. The body of the message is expected to be empty.
       parameters:
         agentIdOrGroup:
           $ref: "https://raw.githubusercontent.com/RandomStudio/tether/asyncapi/tether.yml#/components/parameters/agentIdOrGroup"
