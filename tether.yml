@@ -51,6 +51,14 @@ channels:
     publish:
       $ref: "#/components/channels/requestLidarConfig/subscribe"
 
+  "{agentType}/{agentIdOrGroup}/saveLidarConfig":
+    description:
+      $ref: "#/components/channels/saveLidarConfig/description"
+    parameters:
+      $ref: "#/components/channels/saveLidarConfig/parameters"
+    publish:
+      $ref: "#/components/channels/saveLidarConfig/subscribe"
+
 components:
   channels:
     scans:
@@ -125,6 +133,23 @@ components:
         message:
           $ref: "#/components/messages/requestLidarConfig"
 
+    saveLidarConfig:
+      description: Instruct the Lidar Consolidation Agent to save a given configuration, including devices (required) and ROI (optional)
+      parameters:
+        agentType:
+          description: In this case, the agent type is ignored, i.e. subscription is to +/+/saveLidarConfig so any agent sending a message of this type will be acceptable.
+
+        agentIdOrGroup:
+          $ref: "https://raw.githubusercontent.com/RandomStudio/tether/asyncapi/tether.yml#/components/parameters/agentIdOrGroup"
+      publish:
+        summary: Input Plug for saveLidarConfig
+        message:
+          $ref: "#/components/messages/saveLidarConfig"
+      subscribe:
+        summary: Output Plug for saveLidarConfig
+        message:
+          $ref: "#/components/messages/saveLidarConfig"
+
   messages:
     scans:
       name: scans
@@ -157,6 +182,13 @@ components:
       title: Request Lidar Config
       summary: Empty body; contents will be ignored
       payload: {}
+
+    saveLidarConfig:
+      name: saveLidarConfig
+      title: Provide a LIDAR configuration (devices and ROI) that should be saved by the Consolidator.
+      summary: Device information (required) and ROI (optional)
+      payload:
+        $ref: "#/components/schemas/lidarConfigPayload"
 
   schemas:
     scansPayload:
