@@ -35,11 +35,11 @@ components:
         agentIdOrGroup:
           $ref: "https://raw.githubusercontent.com/RandomStudio/tether/asyncapi/tether.yml#/components/parameters/agentIdOrGroup"
       publish:
-        summary: Input distance measurements where each complete message represents a complete "scan" or single revolution of the spinning LIDAR
+        summary: Input Plug for scans
         message:
           $ref: "#/components/messages/scans"
       subscribe:
-        summary: Output distance measurements where each complete message represents a complete "scan" or single revolution of the spinning LIDAR
+        summary: Output Plug for scans
         message:
           $ref: "#/components/messages/scans"
 
