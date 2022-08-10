@@ -19,7 +19,7 @@ channels:
     publish:
       $ref: "#/components/channels/scans/publish"
 
-  lidar2d/{agentIdOrGroup}/clusters:
+  lidarConsolidation/{agentIdOrGroup}/clusters:
     description:
       $ref: "#/components/channels/clusters/description"
     parameters:
@@ -27,7 +27,7 @@ channels:
     subscribe:
       $ref: "#/components/channels/clusters/subscribe"
 
-  lidar2d/{agentIdOrGroup}/trackedPoints:
+  lidarConsolidation/{agentIdOrGroup}/trackedPoints:
     description:
       $ref: "#/components/channels/trackedPoints/description"
     parameters:
@@ -35,13 +35,23 @@ channels:
     subscribe:
       $ref: "#/components/channels/trackedPoints/subscribe"
 
+  lidarConsolidation/{agentIdOrGroup}/provideLidarConfig:
+    description:
+      $ref: "#/components/channels/provideLidarConfig/description"
+    parameters:
+      $ref: "#/components/channels/provideLidarConfig/parameters"
+    subscribe:
+      $ref: "#/components/channels/provideLidarConfig/subscribe"
+
 components:
   channels:
     scans:
       description: A single "scan" frame, i.e. measurements taken after 360 degrees of rotation.
       parameters:
         agentIdOrGroup:
-          $ref: "https://raw.githubusercontent.com/RandomStudio/tether/asyncapi/tether.yml#/components/parameters/agentIdOrGroup"
+          description: In this case, should typically be a unique identifier for the device sending the scan data, e.g. a serial number. This is used by the consolidator to save associated configuration.
+          schema:
+            type: string
       publish:
         summary: Input Plug for scans
         message:
@@ -79,6 +89,20 @@ components:
         message:
           $ref: "#/components/messages/trackedPoints"
 
+    provideLidarConfig:
+      description: Provide the list of currently-configured (saved) LIDAR device configurations. This is used by the Lidar Consolidator itself, but may also be useful for other Agents, e.g. tether-tracking-viz
+      parameters:
+        agentIdOrGroup:
+          $ref: "https://raw.githubusercontent.com/RandomStudio/tether/asyncapi/tether.yml#/components/parameters/agentIdOrGroup"
+      publish:
+        summary: Input Plug for provideLidarConfig
+        message:
+          $ref: "#/components/messages/provideLidarConfig"
+      subscribe:
+        summary: Output Plug for provideLidarConfig
+        message:
+          $ref: "#/components/messages/provideLidarConfig"
+
   messages:
     scans:
       name: scans
@@ -98,6 +122,13 @@ components:
       summary: Normalised tracked points within the ROI
       payload:
         $ref: "#/components/schemas/trackedPointsPayload"
+
+    provideLidarConfig:
+      name: provideLidarConfig
+      title: Provide LIDAR Device Configuration
+      summary: Information and configuration for all devices known to the consolidator to align scan data. Also the single ROI currently defined for tracking.
+      payload:
+        $ref: "#/components/schemas/lidarConfigPayload"
 
   schemas:
     scansPayload:
@@ -137,9 +168,58 @@ components:
         properties:
           id:
             type: number
+            description: Index number of tracked point. In the case of "raw" tracked points from the Lidar Consolidator, these are not guaranteed to be consistent between frames, but for tether-smooth-tracking, they should be.
           x:
             type: number
           y:
             type: number
           size:
             type: number
+
+    lidarConfigPayload:
+      type: array
+      items:
+        type: object
+        required:
+          - devices
+        properties:
+          devices:
+            type: object
+            properties:
+              serial:
+                type: string
+              name:
+                type: string
+              rotation:
+                type: number
+                description: Rotation of the LIDAR device, given in degrees
+              x:
+                type: number
+              y:
+                type: number
+              color:
+                type: array
+                minItems: 3
+                maxItems: 3
+                description: RGB values as [R,G,B] array
+                items:
+                  type: number
+          regionOfInterest:
+            description: The coordinates, relative to the combined/transformed cluster coordinates, of the four corners of the quadrilateral polygon defined the tracking region of interest (ROI).
+            type: array
+            minItems: 4
+            maxItems: 4
+            items:
+              type: object
+              properties:
+                corner:
+                  description: topLeft, topRight, bottomLeft, bottomRight
+                  enum:
+                    - 0
+                    - 1
+                    - 2
+                    - 3
+                x:
+                  type: number
+                y:
+                  type: number
