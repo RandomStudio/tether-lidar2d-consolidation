@@ -19,6 +19,14 @@ channels:
     publish:
       $ref: "#/components/channels/scans/publish"
 
+  lidar2d/{agentIdOrGroup}/clusters:
+    description:
+      $ref: "#/components/channels/clusters/description"
+    parameters:
+      $ref: "#/components/channels/clusters/parameters"
+    subscribe:
+      $ref: "#/components/channels/clusters/subscribe"
+
 components:
   messages:
     scans:
@@ -27,6 +35,12 @@ components:
       summary: Distances measurements from each Scan Frame
       payload:
         $ref: "#/components/schemas/scanPayload"
+    clusters:
+      name: cluster
+      title: List of clusters
+      summary: 2D points with non-normalised position, and including a size (radius). Not typically suitable for final tracking data, but may be useful for configuration, troubleshooting and debugging.
+      payload:
+        $ref: "#/components/schemas/clusterPayload"
 
   channels:
     scans:
@@ -42,6 +56,16 @@ components:
         summary: Output Plug for scans
         message:
           $ref: "#/components/messages/scans"
+
+    clusters:
+      description: A list of "clusters", which are 2D coordinates that are *not* normalised to a particular range. The clusters may be based on a set (scans) from one or more LIDAR scanners.
+      parameters:
+        agentIdOrGroup:
+          $ref: "https://raw.githubusercontent.com/RandomStudio/tether/asyncapi/tether.yml#/components/parameters/agentIdOrGroup"
+      subscribe:
+        summary: Outplug Plug for clusters
+        message:
+          $ref: "#/components/messages/clusters"
 
   schemas:
     scanPayload:
@@ -69,3 +93,21 @@ components:
               minimum: 0
               maximum: 1
               description: Quality of measurement sample, from 0 (should ignore) to 1 (as reliable as possible)
+
+    clusterPayload:
+      type: array
+      items:
+        type: object
+        required:
+          - id
+          - x
+          - y
+        properties:
+          id:
+            type: number
+          x:
+            type: number
+          y:
+            type: number
+          size:
+            type: number
