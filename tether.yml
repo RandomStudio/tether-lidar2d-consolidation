@@ -12,14 +12,12 @@ defaultContentType: application/msgpack
 
 channels:
   lidar2d/{agentIdOrGroup}/scans:
-    description: A single "scan" frame, i.e. measurements taken after 360 degrees of rotation.
+    description:
+      $ref: "#/components/channels/scans/description"
     parameters:
-      agentIdOrGroup:
-        $ref: "https://raw.githubusercontent.com/RandomStudio/tether/asyncapi/tether.yml#/components/parameters/agentIdOrGroup"
+      $ref: "#/components/channels/scans/parameters"
     publish:
-      summary: Collect distance measurements where each complete message represents a complete "scan" or single revolution of the spinning LIDAR
-      message:
-        $ref: "#/components/messages/scans"
+      $ref: "#/components/channels/scans/publish"
 
 components:
   messages:
@@ -29,6 +27,21 @@ components:
       summary: Distances measurements from each Scan Frame
       payload:
         $ref: "#/components/schemas/scanPayload"
+
+  channels:
+    scans:
+      description: A single "scan" frame, i.e. measurements taken after 360 degrees of rotation.
+      parameters:
+        agentIdOrGroup:
+          $ref: "https://raw.githubusercontent.com/RandomStudio/tether/asyncapi/tether.yml#/components/parameters/agentIdOrGroup"
+      publish:
+        summary: Input distance measurements where each complete message represents a complete "scan" or single revolution of the spinning LIDAR
+        message:
+          $ref: "#/components/messages/scans"
+      subscribe:
+        summary: Output distance measurements where each complete message represents a complete "scan" or single revolution of the spinning LIDAR
+        message:
+          $ref: "#/components/messages/scans"
 
   schemas:
     scanPayload:
