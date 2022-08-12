@@ -28,6 +28,7 @@ export interface CornerPoint {
 export interface LidarConsolidatedConfig {
   devices: LidarDeviceConfig[];
   regionOfInterest?: CornerPoint[];
+  excludeRegions?: ExcludeRegion[];
 }
 
 export interface ScanData {
@@ -44,4 +45,8 @@ export interface TrackedPoint2D {
   size?: number;
   x: number;
   y: number;
+}
+
+export interface ExcludeRegion extends TrackedPoint2D {
+  size: number;
 }

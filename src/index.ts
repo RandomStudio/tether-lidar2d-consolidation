@@ -29,6 +29,7 @@ import {
   setTranslation,
 } from "./redux/rootSlice";
 import PerspectiveTransformer from "./Transformer/Transformer";
+import ClusterMask from "./ClusterMask/ClusterMask";
 
 const config: Config = parseConfig(rc("Lidar2DConsolidationAgent", defaults));
 
@@ -61,6 +62,9 @@ const main = async () => {
     transformer.setCorners(regionOfInterest);
   }
 
+  const { excludeRegions } = store.getState().config;
+  const clusterMask = new ClusterMask(excludeRegions || []);
+
   const scansInput = agent.createInput(`scans`);
   scansInput.onMessage((payload, topic) => {
     const message = decode(payload) as ScanMessage;
@@ -70,6 +74,7 @@ const main = async () => {
       serial,
       consolidator,
       transformer,
+      clusterMask,
       clusterOutput,
       trackingOutput
     );
@@ -126,6 +131,7 @@ const onScanReceived = (
   serial: string,
   consolidator: Consolidator,
   transformer: PerspectiveTransformer,
+  clusterMask: ClusterMask,
   clustersPlug: Output,
   trackingPlug: Output
 ) => {
@@ -153,12 +159,12 @@ const onScanReceived = (
     FileIO.save(store.getState().config, config.lidarConfigPath);
   }
 
-  // retrieve lidar samples from the message
+  // Retrieve lidar samples from the message
   logger.trace(
     `${samples.length} scan samples received from lidar with serial ${serial}`
   );
 
-  // determine positions of "non-background" objects based on received lidar points
+  // Add points to consolidated map, from this device scan frame
   consolidator.setScanData(serial, samples);
 
   const {
@@ -167,18 +173,28 @@ const onScanReceived = (
     maxClusterSize,
   } = config.clustering;
 
-  const points = consolidator.findPoints(
+  const clustersAsPoints = consolidator.findPoints(
     consolidator.getCombinedTransformedPoints(),
     neighbourhoodRadius,
     minNeighbours,
     maxClusterSize
   );
 
-  const clusters = encode(points);
-  clustersPlug.publish(clusters);
+  /*
+    Both "clusters" and "trackingPoints" emitted by the Agent as TrackedPoint2D[]
+
+    The differences are:
+    - Clusters always have a size (radius) included
+    - Tracking Points are filtered out when they lie outside of the ROI, and their coordinates are normalised within the ROI quad
+  */
+
+  const clusterPointsToSend = encode(clustersAsPoints);
+  clustersPlug.publish(clusterPointsToSend);
 
   if (transformer && transformer.isReady()) {
-    const trackingPoints = transformer.transform(points);
+    const trackingPoints = transformer
+      .transform(clustersAsPoints)
+      .filter((p) => !clusterMask.isPointWithinExcludedRegion(p));
     logger.trace({ trackingPoints });
     trackingPlug.publish(encode(trackingPoints));
   }

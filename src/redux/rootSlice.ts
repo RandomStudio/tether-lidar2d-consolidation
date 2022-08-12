@@ -1,8 +1,10 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
   CornerPoint,
+  ExcludeRegion,
   LidarConsolidatedConfig,
   LidarDeviceConfig,
+  TrackedPoint2D,
 } from "../consolidator/types";
 import { StoreState } from "./types";
 
@@ -58,6 +60,9 @@ export const rootSlice = createSlice({
     setROI: (state, action: PayloadAction<CornerPoint[]>) => {
       state.config.regionOfInterest = action.payload;
     },
+    setExcludedRegions: (state, action: PayloadAction<ExcludeRegion[]>) => {
+      state.config.excludeRegions = action.payload;
+    },
   },
 });
 
@@ -69,85 +74,7 @@ export const {
   setColor,
   loadStore,
   setROI,
+  setExcludedRegions,
 } = rootSlice.actions;
 
 export default rootSlice.reducer;
-
-//  (state = defaultState, action): StoreState => {
-//   switch (action.type) {
-//     case ActionType.INIT_STORE: {
-//       const { config } = action;
-//       return {
-//         ...defaultState,
-//         ...config,
-//       };
-//     }
-//     case ActionType.ADD_LIDAR: {
-//       const { config } = action;
-//       return {
-//         ...state,
-//         config: {
-//           ...config,
-//           devices: [...state.config.devices],
-//         },
-//       };
-//     }
-//     case ActionType.SET_LIDAR_NAME: {
-//       const { serial, name } = action;
-//       return {
-//         ...state,
-//         config: {
-//           ...state.config,
-//           devices: state.config.devices.map((l) => ({
-//             ...l,
-//             name: l.serial === serial ? name : l.name,
-//           })),
-//         },
-//       };
-//     }
-//     case ActionType.SET_LIDAR_ROTATION: {
-//       const { serial, rotation } = action;
-//       return {
-//         ...state,
-//         config: {
-//           ...state.config,
-//           devices: state.config.devices.map((l) => ({
-//             ...l,
-//             rotation: l.serial === serial ? rotation : l.rotation,
-//           })),
-//         },
-//       };
-//     }
-//     case ActionType.SET_LIDAR_TRANSLATION: {
-//       const { serial, x, y } = action;
-//       return {
-//         ...state,
-//         config: {
-//           ...state.config,
-//           devices: state.config.devices.map((l) => ({
-//             ...l,
-//             x: l.serial === serial ? x : l.x,
-//             y: l.serial === serial ? y : l.y,
-//           })),
-//         },
-//       };
-//     }
-//     case ActionType.SET_LIDAR_COLOR: {
-//       const { serial, r, g, b } = action;
-//       return {
-//         ...state,
-//         config: {
-//           ...state.config,
-//           devices: state.config.devices.map((l) => ({
-//             ...l,
-//             color: l.serial === serial ? [r, g, b] : l.color,
-//           })),
-//         },
-//       };
-//     }
-//     default:
-//       return {
-//         ...state,
-//       };
-//   }
-// };
