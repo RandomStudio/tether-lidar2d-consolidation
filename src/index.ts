@@ -23,12 +23,14 @@ import {
   addDevice,
   loadStore,
   setColor,
+  setMask,
   setName,
   setROI,
   setRotation,
   setTranslation,
 } from "./redux/rootSlice";
 import PerspectiveTransformer from "./Transformer/Transformer";
+import AutoMaskSampler from "./AutoMask/AutoMaskSampler";
 
 const config: Config = parseConfig(rc("Lidar2DConsolidationAgent", defaults));
 
@@ -61,6 +63,8 @@ const main = async () => {
     transformer.setCorners(regionOfInterest);
   }
 
+  let autoMaskSamplers: AutoMaskSampler[] = [];
+
   const scansInput = agent.createInput(`scans`);
   scansInput.onMessage((payload, topic) => {
     const message = decode(payload) as ScanMessage;
@@ -73,6 +77,26 @@ const main = async () => {
       clusterOutput,
       trackingOutput
     );
+    // If any AutoMaskSampler instances are active, we'll
+    // hand the scan over to the corresponding instances
+    // for this Lidar (by serial)
+    autoMaskSamplers.forEach((s) => {
+      if (s.getCompleted() === false && s.getSerial() === serial) {
+        if (s.addSamples(message)) {
+          // If returns true, we know that the auto sampling has now completed
+          logger.info("AutoMaskSampler for lidar", serial, "completed");
+          logger.debug(JSON.stringify(s.getThresholds()));
+          logger.debug(
+            "Adding",
+            Object.keys(s.getThresholds()).length,
+            "thresholds"
+          );
+          store.dispatch(
+            setMask({ serial, anglesWithThresholds: s.getThresholds() })
+          );
+        }
+      }
+    });
   });
 
   const requestConfigInput = agent.createInput("requestLidarConfig");
@@ -85,6 +109,25 @@ const main = async () => {
     const m = encode(config);
     // Reply with config saved in state
     requestConfigOutput.publish(m);
+  });
+
+  const requestAutoMask = agent.createInput("requestAutoMask");
+  requestAutoMask.onMessage(() => {
+    // These message have empty body
+    const { devices } = store.getState().config;
+    const { numScansrequired, minThresholdMargin } = config.autoMask;
+    logger.info(
+      "requestAutoMask received; will init AutoMaskSamplers for",
+      devices.length,
+      "device(s)"
+    );
+    logger.debug("Init AutoMaskSamplers with", {
+      numScansrequired,
+      minThresholdMargin,
+    });
+    autoMaskSamplers = devices.map(
+      (d) => new AutoMaskSampler(d.serial, numScansrequired, minThresholdMargin)
+    );
   });
 
   const saveConfigInput = agent.createInput("saveLidarConfig");

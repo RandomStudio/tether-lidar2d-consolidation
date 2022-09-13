@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
+  AnglesWithThresholds,
   CornerPoint,
   LidarConsolidatedConfig,
   LidarDeviceConfig,
@@ -58,6 +59,17 @@ export const rootSlice = createSlice({
     setROI: (state, action: PayloadAction<CornerPoint[]>) => {
       state.config.regionOfInterest = action.payload;
     },
+    setMask: (
+      state,
+      action: PayloadAction<{
+        serial: string;
+        anglesWithThresholds: AnglesWithThresholds;
+      }>
+    ) => {
+      const { serial, anglesWithThresholds } = action.payload;
+      const device = state.config.devices.find((d) => d.serial === serial);
+      device.scanMaskThresholds = anglesWithThresholds;
+    },
   },
 });
 
@@ -69,6 +81,7 @@ export const {
   setColor,
   loadStore,
   setROI,
+  setMask,
 } = rootSlice.actions;
 
 export default rootSlice.reducer;

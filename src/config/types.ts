@@ -15,4 +15,8 @@ export interface Config {
     ignoreOutside: boolean;
     ignoreOutsideMargin: number;
   };
+  autoMask: {
+    numScansrequired: number;
+    minThresholdMargin: number;
+  };
 }

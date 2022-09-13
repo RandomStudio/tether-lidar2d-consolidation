@@ -3,6 +3,11 @@ export interface Point2D {
   y: number;
 }
 
+export interface AnglesWithThresholds {
+  [angle: number]: number;
+}
+// export type AnglesWithThresholds = Map<number, number>;
+
 export interface LidarDeviceConfig {
   serial: string;
   name: string;
@@ -10,6 +15,7 @@ export interface LidarDeviceConfig {
   x: number;
   y: number;
   color: number[];
+  scanMaskThresholds?: AnglesWithThresholds;
 }
 
 export enum CornerIndex {
