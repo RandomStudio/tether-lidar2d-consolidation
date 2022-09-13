@@ -63,6 +63,18 @@ const main = async () => {
     transformer.setCorners(regionOfInterest);
   }
 
+  const requestConfigInput = agent.createInput("requestLidarConfig");
+  const requestConfigOutput = agent.createOutput("provideLidarConfig");
+  requestConfigInput.onMessage(() => {
+    // These messages have empty body
+    const config = store.getState().config;
+    logger.info("client requested config");
+    logger.debug("sending", config);
+    const m = encode(config);
+    // Reply with config saved in state
+    requestConfigOutput.publish(m);
+  });
+
   let autoMaskSamplers: AutoMaskSampler[] = [];
 
   const scansInput = agent.createInput(`scans`);
@@ -94,21 +106,15 @@ const main = async () => {
           store.dispatch(
             setMask({ serial, anglesWithThresholds: s.getThresholds() })
           );
+          // And broadcast the new state
+          const config = store.getState().config;
+          logger.debug("sending", config);
+          const m = encode(config);
+          // Reply with config saved in state
+          requestConfigOutput.publish(m);
         }
       }
     });
-  });
-
-  const requestConfigInput = agent.createInput("requestLidarConfig");
-  const requestConfigOutput = agent.createOutput("provideLidarConfig");
-  requestConfigInput.onMessage(() => {
-    // These messages have empty body
-    const config = store.getState().config;
-    logger.info("client requested config");
-    logger.debug("sending", config);
-    const m = encode(config);
-    // Reply with config saved in state
-    requestConfigOutput.publish(m);
   });
 
   const requestAutoMask = agent.createInput("requestAutoMask");
@@ -201,8 +207,10 @@ const onScanReceived = (
     `${samples.length} scan samples received from lidar with serial ${serial}`
   );
 
+  const { scanMaskThresholds } = existingDevice;
+
   // Add points to consolidated map, from this device scan frame
-  consolidator.setScanData(serial, samples);
+  consolidator.setScanData(serial, samples, scanMaskThresholds);
 
   const {
     neighbourhoodRadius,

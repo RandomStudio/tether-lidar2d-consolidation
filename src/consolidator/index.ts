@@ -1,8 +1,15 @@
 import Clustering from "density-clustering";
 import store from "../redux";
-import { Point2D, ScanData, ScanSample, TrackedPoint2D } from "./types";
+import {
+  AnglesWithThresholds,
+  Point2D,
+  ScanData,
+  ScanSample,
+  TrackedPoint2D,
+} from "./types";
 
 import { logger } from "..";
+import { config } from "process";
 
 export default class Consolidator {
   private dbscan: Clustering.DBSCAN;
@@ -36,7 +43,11 @@ export default class Consolidator {
    * Add scan data, replacing preexisting data with the same lidar serial, if any
    * @param scanData
    */
-  public setScanData = (serial: string, samples: ScanSample[]) => {
+  public setScanData = (
+    serial: string,
+    samples: ScanSample[],
+    scanMaskThresholds?: AnglesWithThresholds
+  ) => {
     // only add scan data for known lidars
     const lidar = store
       .getState()
@@ -47,7 +58,8 @@ export default class Consolidator {
         samples,
         lidar.rotation,
         lidar.x,
-        lidar.y
+        lidar.y,
+        scanMaskThresholds
       );
       logger.trace(
         `Created ${transformedSamples.length} transformed samples from scan of size ${samples.length}`
@@ -104,11 +116,36 @@ export default class Consolidator {
     samples: ScanSample[],
     rotation: number,
     x: number,
-    y: number
+    y: number,
+    scanMaskThresholds?: AnglesWithThresholds
   ): Point2D[] =>
     samples
       .filter((s) => s[2] === undefined || s[2] > 0) // s[2] is quality, which may not be defined
       .filter((s) => s[1] > 0) // s[1] is distance
+      .filter((s) => {
+        if (scanMaskThresholds === undefined) {
+          return true;
+        } else {
+          const [angle, distance] = s;
+          const thresholdDistance = scanMaskThresholds[angle.toString()];
+          if (!thresholdDistance) {
+            return true;
+          } else {
+            const accept = distance < thresholdDistance - 10;
+            if (!accept) {
+              logger.trace(
+                "reject",
+                { angle, distance },
+                "due to threshold",
+                scanMaskThresholds[angle.toString()],
+                "at angle",
+                angle
+              );
+            }
+            return accept;
+          }
+        }
+      })
       .map((s) => {
         const [angle, distance] = s;
         return {

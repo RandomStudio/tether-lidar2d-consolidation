@@ -25,7 +25,7 @@ const defaults: Config = {
     ignoreOutsideMargin: 0.04,
   },
   autoMask: {
-    numScansrequired: 16,
+    numScansrequired: 50,
     minThresholdMargin: 10,
   },
 };

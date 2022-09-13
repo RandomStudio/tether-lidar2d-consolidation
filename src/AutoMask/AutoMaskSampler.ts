@@ -24,16 +24,11 @@ class AutoMaskSampler {
     if (this.scansRemaining > 0) {
       samples.forEach((sample) => {
         const [angle, distance, _quality] = sample;
-        // Add or update entry in Map
-        // this.anglesWithThresholds.set(angle, distance - this.thresholdMargin);
 
         const distanceMinusThreshold = distance - this.thresholdMargin;
 
         if (distance > 0 && distanceMinusThreshold > 0) {
-          this.anglesWithThresholds[angle.toString()] = Math.min(
-            0,
-            distanceMinusThreshold
-          );
+          this.anglesWithThresholds[angle.toString()] = distanceMinusThreshold;
         }
       });
       logger.debug(
