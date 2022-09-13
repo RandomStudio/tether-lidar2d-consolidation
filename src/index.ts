@@ -29,7 +29,6 @@ import {
   setTranslation,
 } from "./redux/rootSlice";
 import PerspectiveTransformer from "./Transformer/Transformer";
-import ClusterMask from "./ClusterMask/ClusterMask";
 
 const config: Config = parseConfig(rc("Lidar2DConsolidationAgent", defaults));
 
@@ -62,9 +61,6 @@ const main = async () => {
     transformer.setCorners(regionOfInterest);
   }
 
-  const { excludeRegions } = store.getState().config;
-  const clusterMask = new ClusterMask(excludeRegions || []);
-
   const scansInput = agent.createInput(`scans`);
   scansInput.onMessage((payload, topic) => {
     const message = decode(payload) as ScanMessage;
@@ -74,7 +70,6 @@ const main = async () => {
       serial,
       consolidator,
       transformer,
-      clusterMask,
       clusterOutput,
       trackingOutput
     );
@@ -131,7 +126,6 @@ const onScanReceived = (
   serial: string,
   consolidator: Consolidator,
   transformer: PerspectiveTransformer,
-  clusterMask: ClusterMask,
   clustersPlug: Output,
   trackingPlug: Output
 ) => {
@@ -192,9 +186,7 @@ const onScanReceived = (
   clustersPlug.publish(clusterPointsToSend);
 
   if (transformer && transformer.isReady()) {
-    const trackingPoints = transformer
-      .transform(clustersAsPoints)
-      .filter((p) => !clusterMask.isPointWithinExcludedRegion(p));
+    const trackingPoints = transformer.transform(clustersAsPoints);
     logger.trace({ trackingPoints });
     trackingPlug.publish(encode(trackingPoints));
   }

@@ -1,10 +1,8 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
   CornerPoint,
-  ExcludeRegion,
   LidarConsolidatedConfig,
   LidarDeviceConfig,
-  TrackedPoint2D,
 } from "../consolidator/types";
 import { StoreState } from "./types";
 
@@ -60,9 +58,6 @@ export const rootSlice = createSlice({
     setROI: (state, action: PayloadAction<CornerPoint[]>) => {
       state.config.regionOfInterest = action.payload;
     },
-    setExcludedRegions: (state, action: PayloadAction<ExcludeRegion[]>) => {
-      state.config.excludeRegions = action.payload;
-    },
   },
 });
 
@@ -74,7 +69,6 @@ export const {
   setColor,
   loadStore,
   setROI,
-  setExcludedRegions,
 } = rootSlice.actions;
 
 export default rootSlice.reducer;

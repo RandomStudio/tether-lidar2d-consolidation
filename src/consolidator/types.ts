@@ -28,7 +28,6 @@ export interface CornerPoint {
 export interface LidarConsolidatedConfig {
   devices: LidarDeviceConfig[];
   regionOfInterest?: CornerPoint[];
-  excludeRegions?: ExcludeRegion[];
 }
 
 export interface ScanData {
