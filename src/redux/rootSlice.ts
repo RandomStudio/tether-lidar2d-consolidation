@@ -70,6 +70,11 @@ export const rootSlice = createSlice({
       const device = state.config.devices.find((d) => d.serial === serial);
       device.scanMaskThresholds = anglesWithThresholds;
     },
+    clearMask: (state, action: PayloadAction<{ serial: string }>) => {
+      const { serial } = action.payload;
+      const device = state.config.devices.find((d) => d.serial === serial);
+      device.scanMaskThresholds = undefined;
+    },
   },
 });
 
@@ -82,6 +87,7 @@ export const {
   loadStore,
   setROI,
   setMask,
+  clearMask,
 } = rootSlice.actions;
 
 export default rootSlice.reducer;

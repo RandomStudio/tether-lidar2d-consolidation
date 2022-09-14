@@ -45,6 +45,10 @@ export type ScanSample = [number, number, number]; // [0] = angle, [1] = distanc
 
 export type ScanMessage = ScanSample[];
 
+export interface RequestAutoMaskMessage {
+  type: "new" | "clear";
+}
+
 export interface TrackedPoint2D {
   id: number;
   size?: number;

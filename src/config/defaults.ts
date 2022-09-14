@@ -25,8 +25,8 @@ const defaults: Config = {
     ignoreOutsideMargin: 0.04,
   },
   autoMask: {
-    numScansrequired: 50,
-    minThresholdMargin: 10,
+    numScansrequired: 45, // at 15Hz, this is 3 seconds
+    minThresholdMargin: 50,
   },
 };
 

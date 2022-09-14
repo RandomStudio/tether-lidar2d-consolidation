@@ -16,11 +16,13 @@ import { Config } from "./config/types";
 import { decode, encode } from "@msgpack/msgpack";
 import {
   LidarConsolidatedConfig,
+  RequestAutoMaskMessage,
   ScanMessage,
   ScanSample,
 } from "./consolidator/types";
 import {
   addDevice,
+  clearMask,
   loadStore,
   setColor,
   setMask,
@@ -36,6 +38,13 @@ const config: Config = parseConfig(rc("Lidar2DConsolidationAgent", defaults));
 
 export const logger = getLogger("Lidar2DConsolidationAgent");
 logger.level = config.loglevel;
+
+const broadcastState = (provideConfigOutput: Output) => {
+  const config = store.getState().config;
+  logger.debug("sending config", config);
+  const m = encode(config);
+  provideConfigOutput.publish(m);
+};
 
 const main = async () => {
   const agent = await TetherAgent.create(config.agentType, config.tether);
@@ -64,15 +73,11 @@ const main = async () => {
   }
 
   const requestConfigInput = agent.createInput("requestLidarConfig");
-  const requestConfigOutput = agent.createOutput("provideLidarConfig");
+  const provideLidarConfigOutput = agent.createOutput("provideLidarConfig");
   requestConfigInput.onMessage(() => {
     // These messages have empty body
-    const config = store.getState().config;
     logger.info("client requested config");
-    logger.debug("sending", config);
-    const m = encode(config);
-    // Reply with config saved in state
-    requestConfigOutput.publish(m);
+    broadcastState(provideLidarConfigOutput);
   });
 
   let autoMaskSamplers: AutoMaskSampler[] = [];
@@ -109,33 +114,54 @@ const main = async () => {
             setMask({ serial, anglesWithThresholds: s.getThresholds() })
           );
           // And broadcast the new state
-          const config = store.getState().config;
-          logger.debug("sending", config);
-          const m = encode(config);
-          // Reply with config saved in state
-          requestConfigOutput.publish(m);
+          broadcastState(provideLidarConfigOutput);
         }
       }
     });
   });
 
   const requestAutoMask = agent.createInput("requestAutoMask");
-  requestAutoMask.onMessage(() => {
-    // These message have empty body
+  requestAutoMask.onMessage((payload) => {
+    const m = decode(payload) as RequestAutoMaskMessage;
     const { devices } = store.getState().config;
-    const { numScansrequired, minThresholdMargin } = config.autoMask;
-    logger.info(
-      "requestAutoMask received; will init AutoMaskSamplers for",
-      devices.length,
-      "device(s)"
-    );
-    logger.debug("Init AutoMaskSamplers with", {
-      numScansrequired,
-      minThresholdMargin,
-    });
-    autoMaskSamplers = devices.map(
-      (d) => new AutoMaskSampler(d.serial, numScansrequired, minThresholdMargin)
-    );
+
+    switch (m.type) {
+      case "new":
+        const { numScansrequired, minThresholdMargin } = config.autoMask;
+        logger.info(
+          `requestAutoMask "new" received; will init AutoMaskSamplers for`,
+          devices.length,
+          "device(s)"
+        );
+        logger.debug("Init AutoMaskSamplers with", {
+          numScansrequired,
+          minThresholdMargin,
+        });
+        autoMaskSamplers = devices.map(
+          (d) =>
+            new AutoMaskSampler(d.serial, numScansrequired, minThresholdMargin)
+        );
+        // New state will be broadcast once automask sampling is completed;
+        // (see scansInput.onMessage handler)
+        break;
+      case "clear":
+        logger.info(
+          `requestAutoMask "clear" received; will clear AutoMaskSamplers for`,
+          devices.length,
+          "device(s)"
+        );
+        autoMaskSamplers = [];
+        devices.forEach((d) => {
+          store.dispatch(clearMask({ serial: d.serial }));
+        });
+        // New state broadcast immediately
+        broadcastState(provideLidarConfigOutput);
+        break;
+      default:
+        logger.error(
+          `Unknown "type" property in requestAutoMask message: "${m.type}"`
+        );
+    }
   });
 
   const saveConfigInput = agent.createInput("saveLidarConfig");
