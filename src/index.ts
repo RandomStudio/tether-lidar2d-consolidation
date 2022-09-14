@@ -51,7 +51,7 @@ const main = async () => {
     logger.warn(
       `Could not load config file, saving default config to new file.`
     );
-    FileIO.save(store.getState().config, config.lidarConfigPath);
+    await FileIO.save(store.getState().config, config.lidarConfigPath);
   }
 
   const clusterOutput = agent.createOutput("clusters");
@@ -96,13 +96,15 @@ const main = async () => {
       if (s.getCompleted() === false && s.getSerial() === serial) {
         if (s.addSamples(message)) {
           // If returns true, we know that the auto sampling has now completed
-          logger.info("AutoMaskSampler for lidar", serial, "completed");
-          logger.debug(JSON.stringify(s.getThresholds()));
-          logger.debug(
+          logger.info(
+            "AutoMaskSampler for lidar",
+            serial,
+            "completed; added",
             "Adding",
             Object.keys(s.getThresholds()).length,
             "thresholds"
           );
+          logger.debug(JSON.stringify(s.getThresholds()));
           store.dispatch(
             setMask({ serial, anglesWithThresholds: s.getThresholds() })
           );
@@ -199,7 +201,13 @@ const onScanReceived = (
     );
 
     // Also save to disk
-    FileIO.save(store.getState().config, config.lidarConfigPath);
+    FileIO.save(store.getState().config, config.lidarConfigPath)
+      .then(() => {
+        logger.info("Saved new config to disk OK");
+      })
+      .catch((e) => {
+        logger.error("Error saving new config to disk: ", e);
+      });
   }
 
   // Retrieve lidar samples from the message
