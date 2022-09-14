@@ -50,11 +50,11 @@ export const rootSlice = createSlice({
     },
     setColor: (
       state,
-      action: PayloadAction<{ serial: string; r: number; g: number; b: number }>
+      action: PayloadAction<{ serial: string; color: string }>
     ) => {
-      const { serial, r, g, b } = action.payload;
+      const { serial, color } = action.payload;
       const device = state.config.devices.find((d) => d.serial === serial);
-      device.color = [r, g, b];
+      device.color = color;
     },
     setROI: (state, action: PayloadAction<CornerPoint[]>) => {
       state.config.regionOfInterest = action.payload;

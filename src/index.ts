@@ -180,8 +180,7 @@ const main = async () => {
         store.dispatch(setName({ serial, name }));
         store.dispatch(setRotation({ serial, rotation }));
         store.dispatch(setTranslation({ serial, x, y }));
-        const [r, g, b] = color;
-        store.dispatch(setColor({ serial, r, g, b }));
+        store.dispatch(setColor({ serial, color }));
       } else {
         throw Error("Could not match LIDAR by serial number " + serial);
       }

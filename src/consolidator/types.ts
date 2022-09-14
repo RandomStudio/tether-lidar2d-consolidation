@@ -14,7 +14,7 @@ export interface LidarDeviceConfig {
   rotation: number;
   x: number;
   y: number;
-  color: number[];
+  color: string;
   scanMaskThresholds?: AnglesWithThresholds;
 }
 
