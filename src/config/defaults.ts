@@ -15,6 +15,10 @@ const defaults: Config = {
     "dist",
     "consolidationConfig.json"
   ),
+  autoBroadcastConfig: {
+    onStartup: true,
+    delay: 2000,
+  },
   clustering: {
     neighbourhoodRadius: 300,
     minNeighbours: 3,

@@ -75,6 +75,12 @@ const main = async () => {
 
   const requestConfigInput = agent.createInput("requestLidarConfig");
   const provideLidarConfigOutput = agent.createOutput("provideLidarConfig");
+  if (config.autoBroadcastConfig.onStartup) {
+    setTimeout(() => {
+      logger.info("on startup, broadcast Config/State...");
+      broadcastState(provideLidarConfigOutput);
+    }, config.autoBroadcastConfig.delay);
+  }
   requestConfigInput.onMessage(() => {
     // These messages have empty body
     logger.info("client requested config");

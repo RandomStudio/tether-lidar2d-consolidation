@@ -6,6 +6,10 @@ export interface Config {
   loglevel: string;
   numLidars: number;
   lidarConfigPath: string;
+  autoBroadcastConfig: {
+    onStartup: boolean;
+    delay: number;
+  };
   clustering: {
     neighbourhoodRadius: number;
     minNeighbours: number;
