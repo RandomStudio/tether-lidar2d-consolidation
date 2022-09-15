@@ -170,7 +170,7 @@ const main = async () => {
     logger.debug("Received Lidar config to save:", lidarConfig);
 
     const { devices, regionOfInterest } = lidarConfig;
-    logger.info("Received config to save, with", devices.length, "devices");
+    logger.info("Received config to save, with", devices.length, "device(s)");
 
     devices.forEach((d) => {
       const { serial, name, rotation, x, y, color } = d;
