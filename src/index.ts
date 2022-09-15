@@ -23,6 +23,7 @@ import {
 import {
   addDevice,
   clearMask,
+  clearROI,
   loadStore,
   setColor,
   setMask,
@@ -188,7 +189,11 @@ const main = async () => {
       }
     });
 
-    store.dispatch(setROI(regionOfInterest));
+    if (regionOfInterest) {
+      store.dispatch(setROI(regionOfInterest));
+    } else {
+      store.dispatch(clearROI());
+    }
 
     if (regionOfInterest) {
       transformer.setCorners(regionOfInterest);

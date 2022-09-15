@@ -59,6 +59,10 @@ export const rootSlice = createSlice({
     setROI: (state, action: PayloadAction<CornerPoint[]>) => {
       state.config.regionOfInterest = action.payload;
     },
+    clearROI: (state, action: PayloadAction) => {
+      const { devices, regionOfInterest } = state.config;
+      state.config = { devices };
+    },
     setMask: (
       state,
       action: PayloadAction<{
@@ -86,6 +90,7 @@ export const {
   setColor,
   loadStore,
   setROI,
+  clearROI,
   setMask,
   clearMask,
 } = rootSlice.actions;
