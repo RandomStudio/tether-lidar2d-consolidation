@@ -3,7 +3,7 @@ import parseConfig from "parse-strings-in-object";
 import { getLogger } from "log4js";
 import convert from "color-convert";
 
-import { TetherAgent, Output, parseAgentIdOrGroup } from "@tether/tether-agent";
+import { TetherAgent, Output, parseAgentIdOrGroup } from "@randomstudio/tether";
 
 import defaults from "./config/defaults";
 
@@ -128,7 +128,8 @@ const main = async () => {
   });
 
   const requestAutoMask = agent.createInput("requestAutoMask");
-  requestAutoMask.onMessage((payload) => {
+  requestAutoMask.onMessage((payload, topic) => {
+    logger.debug("on requestAutoMask message", { topic });
     const m = decode(payload) as RequestAutoMaskMessage;
     const { devices } = store.getState().config;
 

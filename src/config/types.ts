@@ -1,5 +1,4 @@
-import { IClientOptions } from "@tether/tether-agent";
-
+import { IClientOptions } from "@randomstudio/tether";
 export interface Config {
   tether: IClientOptions;
   agentType: string;
