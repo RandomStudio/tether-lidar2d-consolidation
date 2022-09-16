@@ -59,6 +59,14 @@ channels:
     publish:
       $ref: "#/components/channels/saveLidarConfig/subscribe"
 
+  "{agentType}/{agentIdOrGroup}/requestAutoMask":
+    description:
+      $ref: "#/components/channels/requestAutoMask/description"
+    parameters:
+      $ref: "#/components/channels/requestAutoMask/parameters"
+    publish:
+      $ref: "#/components/channels/requestAutoMask/subscribe"
+
 components:
   channels:
     scans:
@@ -134,11 +142,10 @@ components:
           $ref: "#/components/messages/requestLidarConfig"
 
     saveLidarConfig:
-      description: Instruct the Lidar Consolidation Agent to save a given configuration, including devices (required) and ROI (optional)
+      description: Instruct the Lidar Consolidation Agent to save a given configuration, including devices (required) and ROI (optional).
       parameters:
         agentType:
           description: In this case, the agent type is ignored, i.e. subscription is to +/+/saveLidarConfig so any agent sending a message of this type will be acceptable.
-
         agentIdOrGroup:
           $ref: "https://raw.githubusercontent.com/RandomStudio/tether/asyncapi/tether.yml#/components/parameters/agentIdOrGroup"
       publish:
@@ -149,6 +156,22 @@ components:
         summary: Output Plug for saveLidarConfig
         message:
           $ref: "#/components/messages/saveLidarConfig"
+
+    requestAutoMask:
+      description: Instruct the Lidar Consolidation Agent to begin the AutoMask calibration process for all configured LIDAR devices that are configured *OR* clear all AutoMask calibration for the devices.
+      parameters:
+        agentType:
+          description: In this case, the agent type is ignored, i.e. subscription is to +/+/saveLidarConfig so any agent sending a message of this type will be acceptable.
+        agentIdOrGroup:
+          $ref: "https://raw.githubusercontent.com/RandomStudio/tether/asyncapi/tether.yml#/components/parameters/agentIdOrGroup"
+      publish:
+        summary: Input Plug for requestAutoMask
+        message:
+          $ref: "#/components/messages/requestAutoMask"
+      subscribe:
+        summary: Output Plug for requestAutoMask
+        message:
+          $ref: "#/components/messages/requestAutoMask"
 
   messages:
     scans:
@@ -191,6 +214,13 @@ components:
       summary: Device information (required) and ROI (optional)
       payload:
         $ref: "#/components/schemas/lidarConfigPayload"
+
+    requestAutoMask:
+      name: requestAutoMask
+      title: New/clear AutoMask
+      summary: The "type" determines the action
+      payload:
+        $ref: "#/components/schemas/requestAutoMaskPayload"
 
   schemas:
     scansPayload:
@@ -269,3 +299,13 @@ components:
                   type: number
                 y:
                   type: number
+
+    requestAutoMaskPayload:
+      description: Type value of "type" determines whether to start a new AutoMask calibration for all configured devices, or clear out any that have been saved.
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - "new"
+            - "clear"
