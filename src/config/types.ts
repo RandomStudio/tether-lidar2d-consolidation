@@ -14,6 +14,9 @@ export interface Config {
     onStartup: boolean;
     delay: number;
   };
+  preprocess: {
+    minDistance?: number;
+  };
   clustering: {
     neighbourhoodRadius: number;
     minNeighbours: number;

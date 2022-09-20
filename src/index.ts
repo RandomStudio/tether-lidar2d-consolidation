@@ -258,7 +258,12 @@ const onScanReceived = (
     const { scanMaskThresholds } = existingDevice;
 
     // Add points to consolidated map, from this device scan frame
-    consolidator.setScanData(serial, samples, scanMaskThresholds);
+    consolidator.setScanData(
+      serial,
+      samples,
+      config.preprocess.minDistance,
+      scanMaskThresholds
+    );
 
     const {
       neighbourhoodRadius,
