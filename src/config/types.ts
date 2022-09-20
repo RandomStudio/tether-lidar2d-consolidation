@@ -12,7 +12,9 @@ export interface Config {
   loglevel: string;
   lidarConfigPath: string;
   autoBroadcastConfig: {
+    /** If enabled, (re)broadcast the "state" (saved config) on start */
     onStartup: boolean;
+    /** Wait, in milliseconds, before sending on startup */
     delay: number;
   };
   preprocess: {
@@ -20,8 +22,11 @@ export interface Config {
     minDistance?: number;
   };
   clustering: {
+    /** Max distance in mm to a point which can be included in a cluster */
     neighbourhoodRadius: number;
+    /** Min points count that constitutes a valid cluster */
     minNeighbours: number;
+    /** If defined, exclude clusters above this size, in radius */
     maxClusterSize?: number;
   };
   perspectiveTransform: PerspectiveTransformConfig;
