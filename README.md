@@ -3,6 +3,10 @@
 This is a generic Tether agent for consolidation of scan data from multiple lidar sensors.  
 It expects to receive "scan" messages from one or more lidar sensors, and will apply DBSCAN clustering to find groups of points that belong to distinct elements.
 
+## Configuration
+
+JSDoc annotations for the main Config object can be found in [Config type def](./src/config/types.ts)
+
 ## Plugs
 
 See [AsyncAPI YAML](./tether.yml)

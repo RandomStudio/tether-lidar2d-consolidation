@@ -7,7 +7,6 @@ const defaults: Config = {
   },
   agentType: "lidarConsolidation",
   loglevel: "info",
-  numLidars: 1,
   lidarConfigPath: path.resolve(
     __dirname,
     "..",
