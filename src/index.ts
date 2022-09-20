@@ -40,6 +40,8 @@ const config: Config = parseConfig(rc("Lidar2DConsolidationAgent", defaults));
 export const logger = getLogger("Lidar2DConsolidationAgent");
 logger.level = config.loglevel;
 
+logger.debug("Startpup with config", JSON.stringify(config, null, 2));
+
 const broadcastState = (provideConfigOutput: Output) => {
   const config = store.getState().config;
   logger.debug("sending config", config);
