@@ -247,46 +247,46 @@ const onScanReceived = (
       .catch((e) => {
         logger.error("Error saving new config to disk: ", e);
       });
-  }
+  } else {
+    // Retrieve lidar samples from the message
+    logger.trace(
+      `${samples.length} scan samples received from lidar with serial ${serial}`
+    );
 
-  // Retrieve lidar samples from the message
-  logger.trace(
-    `${samples.length} scan samples received from lidar with serial ${serial}`
-  );
+    const { scanMaskThresholds } = existingDevice;
 
-  const { scanMaskThresholds } = existingDevice;
+    // Add points to consolidated map, from this device scan frame
+    consolidator.setScanData(serial, samples, scanMaskThresholds);
 
-  // Add points to consolidated map, from this device scan frame
-  consolidator.setScanData(serial, samples, scanMaskThresholds);
+    const {
+      neighbourhoodRadius,
+      minNeighbours,
+      maxClusterSize,
+    } = config.clustering;
 
-  const {
-    neighbourhoodRadius,
-    minNeighbours,
-    maxClusterSize,
-  } = config.clustering;
+    const clustersAsPoints = consolidator.findPoints(
+      consolidator.getCombinedTransformedPoints(),
+      neighbourhoodRadius,
+      minNeighbours,
+      maxClusterSize
+    );
 
-  const clustersAsPoints = consolidator.findPoints(
-    consolidator.getCombinedTransformedPoints(),
-    neighbourhoodRadius,
-    minNeighbours,
-    maxClusterSize
-  );
+    /*
+      Both "clusters" and "trackingPoints" emitted by the Agent as TrackedPoint2D[]
+  
+      The differences are:
+      - Clusters always have a size (radius) included
+      - Tracking Points are filtered out when they lie outside of the ROI, and their coordinates are normalised within the ROI quad
+    */
 
-  /*
-    Both "clusters" and "trackingPoints" emitted by the Agent as TrackedPoint2D[]
+    const clusterPointsToSend = encode(clustersAsPoints);
+    clustersPlug.publish(clusterPointsToSend);
 
-    The differences are:
-    - Clusters always have a size (radius) included
-    - Tracking Points are filtered out when they lie outside of the ROI, and their coordinates are normalised within the ROI quad
-  */
-
-  const clusterPointsToSend = encode(clustersAsPoints);
-  clustersPlug.publish(clusterPointsToSend);
-
-  if (transformer && transformer.isReady()) {
-    const trackingPoints = transformer.transform(clustersAsPoints);
-    logger.trace({ trackingPoints });
-    trackingPlug.publish(encode(trackingPoints));
+    if (transformer && transformer.isReady()) {
+      const trackingPoints = transformer.transform(clustersAsPoints);
+      logger.trace({ trackingPoints });
+      trackingPlug.publish(encode(trackingPoints));
+    }
   }
 };
 
