@@ -43,4 +43,4 @@ After building, you can run the agent with the following command line arguments:
 ## TODOS
 
 - [x] "Region of interest" using `saveCornerPoints` message could be useful; then send normalised coordinates from this agent
-- [ ] "Background" removal
+- [x] "Background" removal
