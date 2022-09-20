@@ -1,13 +1,16 @@
 import { CornerPoint, TrackedPoint2D } from "../consolidator/types";
 import PerspT from "perspective-transform";
-import defaults from "../config/defaults";
 
 import { logger } from "../";
+import { PerspectiveTransformConfig } from "../config/types";
 
 export default class PerspectiveTransformer {
+  private config: PerspectiveTransformConfig;
   private srcCorners?: number[];
 
-  constructor() {}
+  constructor(config: PerspectiveTransformConfig) {
+    this.config = config;
+  }
 
   setCorners = (srcCorners: CornerPoint[]) => {
     if (srcCorners.length !== 4) {
@@ -41,10 +44,7 @@ export default class PerspectiveTransformer {
 
         const dstPoint = perspT.transform(p.x, p.y);
 
-        const {
-          ignoreOutside,
-          ignoreOutsideMargin,
-        } = defaults.perspectiveTransform;
+        const { ignoreOutside, ignoreOutsideMargin } = this.config;
         if (ignoreOutside) {
           if (
             dstPoint[0] > w + ignoreOutsideMargin ||

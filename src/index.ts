@@ -67,7 +67,7 @@ const main = async () => {
   const clusterOutput = agent.createOutput("clusters");
   const trackingOutput = agent.createOutput("trackedPoints");
 
-  const transformer = new PerspectiveTransformer();
+  const transformer = new PerspectiveTransformer(config.perspectiveTransform);
   const { regionOfInterest } = store.getState().config;
   if (regionOfInterest !== undefined && regionOfInterest.length === 4) {
     transformer.setCorners(regionOfInterest);

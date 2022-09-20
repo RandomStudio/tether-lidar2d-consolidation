@@ -1,4 +1,9 @@
 import { IClientOptions } from "@randomstudio/tether";
+export interface PerspectiveTransformConfig {
+  ignoreOutside: boolean;
+  ignoreOutsideMargin: number;
+}
+
 export interface Config {
   tether: IClientOptions;
   agentType: string;
@@ -14,10 +19,7 @@ export interface Config {
     minNeighbours: number;
     maxClusterSize?: number;
   };
-  perspectiveTransform: {
-    ignoreOutside: boolean;
-    ignoreOutsideMargin: number;
-  };
+  perspectiveTransform: PerspectiveTransformConfig;
   autoMask: {
     numScansrequired: number;
     minThresholdMargin: number;
