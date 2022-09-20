@@ -27,7 +27,7 @@ class AutoMaskSampler {
 
         const distanceMinusThreshold = distance - this.thresholdMargin;
 
-        if (distance > 0 && distanceMinusThreshold > this.thresholdMargin) {
+        if (distance > 0 && distanceMinusThreshold > 0) {
           this.anglesWithThresholds[angle.toString()] = distanceMinusThreshold;
         }
       });

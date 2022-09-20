@@ -131,7 +131,7 @@ export default class Consolidator {
           if (!thresholdDistance) {
             return true;
           } else {
-            const accept = distance < thresholdDistance - 10;
+            const accept = distance < thresholdDistance;
             if (!accept) {
               logger.trace(
                 "reject",
