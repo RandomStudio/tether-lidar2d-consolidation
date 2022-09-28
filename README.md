@@ -33,7 +33,7 @@ npm run build
 
 After building, you can override the agent default config via the usual methods provided by [rc](https://www.npmjs.com/package/rc)
 
-This include command-line overrides, so for example...
+This includes command-line parameters, so for example...
 
 ```
 node dist/index.js --loglevel=debug --clustering.minNeighbours=10
