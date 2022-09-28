@@ -5,11 +5,15 @@ export interface PerspectiveTransformConfig {
   ignoreOutsideMargin: number;
 }
 
+/**
+ * Agent config; separate from LIDAR device config
+ */
 export interface Config {
   /** Message Broker connection override settings */
   tether: IClientOptions;
   agentType: string;
   loglevel: string;
+  /** Where to load LIDAR device config */
   lidarConfigPath: string;
   autoBroadcastConfig: {
     /** If enabled, (re)broadcast the "state" (saved config) on start */
