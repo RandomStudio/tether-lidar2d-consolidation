@@ -43,11 +43,16 @@ logger.level = config.loglevel;
 
 logger.debug("Startpup with config", JSON.stringify(config, null, 2));
 
-const broadcastState = (provideConfigOutput: Output) => {
-  const config = store.getState().config;
-  logger.debug("sending config", config);
-  const m = encode(config);
-  provideConfigOutput.publish(m);
+const broadcastState = (agent: TetherAgent) => {
+  const provideConfigOutput = agent.getOutput("provideLidarConfig");
+  if (provideConfigOutput) {
+    const config = store.getState().config;
+    logger.debug("sending config", config);
+    const m = encode(config);
+    provideConfigOutput.publish(m);
+  } else {
+    logger.error("broadcastState: Could not find Output provideLidarConfig");
+  }
 };
 
 const main = async () => {
@@ -81,13 +86,13 @@ const main = async () => {
   if (config.autoBroadcastConfig.onStartup) {
     setTimeout(() => {
       logger.info("on startup, broadcast Config/State...");
-      broadcastState(provideLidarConfigOutput);
+      broadcastState(agent);
     }, config.autoBroadcastConfig.delay);
   }
   requestConfigInput.onMessage(() => {
     // These messages have empty body
     logger.info("client requested config");
-    broadcastState(provideLidarConfigOutput);
+    broadcastState(agent);
   });
 
   let autoMaskSamplers: AutoMaskSampler[] = [];
@@ -102,7 +107,8 @@ const main = async () => {
       consolidator,
       transformer,
       clusterOutput,
-      trackingOutput
+      trackingOutput,
+      agent
     );
     // If any AutoMaskSampler instances are active, we'll
     // hand the scan over to the corresponding instances
@@ -124,7 +130,7 @@ const main = async () => {
             setMask({ serial, anglesWithThresholds: s.getThresholds() })
           );
           // And broadcast the new state
-          broadcastState(provideLidarConfigOutput);
+          broadcastState(agent);
         }
       }
     });
@@ -170,7 +176,7 @@ const main = async () => {
         await FileIO.save(store.getState().config, config.lidarConfigPath);
 
         // And new state broadcast
-        broadcastState(provideLidarConfigOutput);
+        broadcastState(agent);
         break;
 
       default:
@@ -223,7 +229,7 @@ const main = async () => {
     await FileIO.save(store.getState().config, config.lidarConfigPath);
 
     // And re-broadcast updated state
-    broadcastState(provideLidarConfigOutput);
+    broadcastState(agent);
   });
 };
 
@@ -233,7 +239,8 @@ const onScanReceived = (
   consolidator: Consolidator,
   transformer: PerspectiveTransformer,
   clustersPlug: Output,
-  trackingPlug: Output
+  trackingPlug: Output,
+  agent: TetherAgent
 ) => {
   // Check if this LIDAR has been added to State
   const existingDevice = store
@@ -264,6 +271,9 @@ const onScanReceived = (
       .catch((e) => {
         logger.error("Error saving new config to disk: ", e);
       });
+
+    // And (re)broadcast state
+    broadcastState(agent);
   } else {
     // Retrieve lidar samples from the message
     logger.trace(
