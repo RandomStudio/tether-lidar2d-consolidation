@@ -41,7 +41,7 @@ node dist/index.js --loglevel=debug --clustering.minNeighbours=10
 
 ... will launch with loglevel `"debug"` and clustering minNeighbours set to `10`
 
-The full configuration options are documented at [./src/config/types.ts](./src/config/types.ts)
+The full configuration options are documented at [./src/config/types.ts](./src/config/types.ts) and defaults are at [./src/config/defaults.ts](./src/config/defaults.ts)
 
 ## TODOS
 
