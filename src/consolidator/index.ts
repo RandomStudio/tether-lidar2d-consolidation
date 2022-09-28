@@ -46,7 +46,7 @@ export default class Consolidator {
   public setScanData = (
     serial: string,
     samples: ScanSample[],
-    minDistance?: number,
+    minDistance: number,
     scanMaskThresholds?: AnglesWithThresholds
   ) => {
     // only add scan data for known lidars
@@ -119,13 +119,13 @@ export default class Consolidator {
     rotation: number,
     x: number,
     y: number,
-    minDistance?: number,
+    minDistance: number,
     scanMaskThresholds?: AnglesWithThresholds
   ): Point2D[] =>
     samples
       .filter((s) => s[2] === undefined || s[2] > 0) // s[2] is quality, which may not be defined
       .filter((s) => s[1] > 0) // s[1] is distance
-      .filter((s) => (minDistance === undefined ? true : s[1] >= minDistance))
+      .filter((s) => s[1] >= minDistance)
       .filter((s) => {
         if (scanMaskThresholds === undefined) {
           return true;
