@@ -15,7 +15,7 @@ import Consolidator from "./consolidator";
 import { Config } from "./config/types";
 import { decode, encode } from "@msgpack/msgpack";
 import {
-  LidarConsolidatedConfig,
+  ConsolidatorConfig,
   RequestAutoMaskMessage,
   ScanMessage,
   ScanSample,
@@ -27,6 +27,7 @@ import {
   loadStore,
   setColor,
   setMask,
+  setMinDistance,
   setName,
   setROI,
   setRotation,
@@ -130,7 +131,7 @@ const main = async () => {
   });
 
   const requestAutoMask = agent.createInput("requestAutoMask");
-  requestAutoMask.onMessage((payload, topic) => {
+  requestAutoMask.onMessage(async (payload, topic) => {
     logger.debug("on requestAutoMask message", { topic });
     const m = decode(payload) as RequestAutoMaskMessage;
     const { devices } = store.getState().config;
@@ -164,9 +165,14 @@ const main = async () => {
         devices.forEach((d) => {
           store.dispatch(clearMask({ serial: d.serial }));
         });
-        // New state broadcast immediately
+
+        // Also save entire config (devices and any regionOfInterest, to disk)
+        await FileIO.save(store.getState().config, config.lidarConfigPath);
+
+        // And new state broadcast
         broadcastState(provideLidarConfigOutput);
         break;
+
       default:
         logger.error(
           `Unknown "type" property in requestAutoMask message: "${m.type}"`
@@ -176,14 +182,14 @@ const main = async () => {
 
   const saveConfigInput = agent.createInput("saveLidarConfig");
   saveConfigInput.onMessage(async (payload) => {
-    const lidarConfig = decode(payload) as LidarConsolidatedConfig;
+    const lidarConfig = decode(payload) as ConsolidatorConfig;
     logger.debug("Received Lidar config to save:", lidarConfig);
 
     const { devices, regionOfInterest } = lidarConfig;
     logger.info("Received config to save, with", devices.length, "device(s)");
 
     devices.forEach((d) => {
-      const { serial, name, rotation, x, y, color } = d;
+      const { serial, name, rotation, x, y, color, minDistanceThreshold } = d;
 
       const device = store
         .getState()
@@ -193,6 +199,11 @@ const main = async () => {
         store.dispatch(setRotation({ serial, rotation }));
         store.dispatch(setTranslation({ serial, x, y }));
         store.dispatch(setColor({ serial, color }));
+        if (minDistanceThreshold) {
+          store.dispatch(
+            setMinDistance({ serial, distance: minDistanceThreshold })
+          );
+        }
       } else {
         throw Error("Could not match LIDAR by serial number " + serial);
       }
@@ -210,6 +221,9 @@ const main = async () => {
 
     // Also save entire config (devices and any regionOfInterest, to disk)
     await FileIO.save(store.getState().config, config.lidarConfigPath);
+
+    // And re-broadcast updated state
+    broadcastState(provideLidarConfigOutput);
   });
 };
 
@@ -261,7 +275,7 @@ const onScanReceived = (
     consolidator.setScanData(
       serial,
       samples,
-      config.preprocess.minDistance,
+      existingDevice.minDistanceThreshold,
       scanMaskThresholds
     );
 

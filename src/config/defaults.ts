@@ -18,9 +18,6 @@ const defaults: Config = {
     onStartup: true,
     delay: 2000,
   },
-  preprocess: {
-    minDistance: 20,
-  },
   clustering: {
     neighbourhoodRadius: 300,
     minNeighbours: 3,

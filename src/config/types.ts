@@ -17,10 +17,6 @@ export interface Config {
     /** Wait, in milliseconds, before sending on startup */
     delay: number;
   };
-  preprocess: {
-    /** If defined, ignore samples closer than this for CLUSTERING  */
-    minDistance?: number;
-  };
   clustering: {
     /** Max distance in mm to a point which can be included in a cluster */
     neighbourhoodRadius: number;

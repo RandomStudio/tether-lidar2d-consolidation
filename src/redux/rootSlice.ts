@@ -2,10 +2,13 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
   AnglesWithThresholds,
   CornerPoint,
-  LidarConsolidatedConfig,
+  ConsolidatorConfig,
   LidarDeviceConfig,
 } from "../consolidator/types";
-import { StoreState } from "./types";
+
+interface StoreState {
+  config: ConsolidatorConfig;
+}
 
 export const initialState: StoreState = {
   config: {
@@ -17,7 +20,7 @@ export const rootSlice = createSlice({
   name: "root",
   initialState,
   reducers: {
-    loadStore: (state, action: PayloadAction<LidarConsolidatedConfig>) => {
+    loadStore: (state, action: PayloadAction<ConsolidatorConfig>) => {
       state.config = action.payload;
     },
     addDevice: (state, action: PayloadAction<LidarDeviceConfig>) => {
@@ -59,9 +62,9 @@ export const rootSlice = createSlice({
     setROI: (state, action: PayloadAction<CornerPoint[]>) => {
       state.config.regionOfInterest = action.payload;
     },
-    clearROI: (state, action: PayloadAction) => {
-      const { devices, regionOfInterest } = state.config;
-      state.config = { devices };
+    clearROI: (state, _action: PayloadAction) => {
+      const { regionOfInterest, ...others } = state.config;
+      state.config = { ...others }; // exclude regionOfInterest
     },
     setMask: (
       state,
@@ -79,6 +82,19 @@ export const rootSlice = createSlice({
       const device = state.config.devices.find((d) => d.serial === serial);
       device.scanMaskThresholds = undefined;
     },
+    setMinDistance: (
+      state,
+      action: PayloadAction<{ serial: string; distance: number }>
+    ) => {
+      const { serial, distance } = action.payload;
+      const device = state.config.devices.find((d) => d.serial === serial);
+      device.minDistanceThreshold = distance;
+    },
+    clearMinDistance: (state, action: PayloadAction<{ serial: string }>) => {
+      const { serial } = action.payload;
+      const device = state.config.devices.find((d) => d.serial === serial);
+      device.minDistanceThreshold = undefined; // TODO: this might not work
+    },
   },
 });
 
@@ -93,6 +109,8 @@ export const {
   clearROI,
   setMask,
   clearMask,
+  setMinDistance,
+  clearMinDistance,
 } = rootSlice.actions;
 
 export default rootSlice.reducer;

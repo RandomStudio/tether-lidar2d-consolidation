@@ -1,6 +1,6 @@
 import fs from "fs/promises";
 import { logger } from "..";
-import { LidarConsolidatedConfig } from "../consolidator/types";
+import { ConsolidatorConfig } from "../consolidator/types";
 
 export default class FileIO {
   private static isWritingToFile: boolean = false;
@@ -8,15 +8,13 @@ export default class FileIO {
   /**
    * Loads the contents of the config file and returns the contents, parsed as JSON.
    */
-  public static load = async (
-    path: string
-  ): Promise<LidarConsolidatedConfig> => {
+  public static load = async (path: string): Promise<ConsolidatorConfig> => {
     logger.info(`Loading config from path "${path}"`);
     try {
       const data = await fs.readFile(path);
 
       try {
-        const json = JSON.parse(data.toString()) as LidarConsolidatedConfig;
+        const json = JSON.parse(data.toString()) as ConsolidatorConfig;
         return json;
       } catch (parseError) {
         throw Error("Parse JSON from file error: " + parseError);
@@ -30,7 +28,7 @@ export default class FileIO {
    * Persist current config data to a file.
    */
   public static save = async (
-    data: LidarConsolidatedConfig,
+    data: ConsolidatorConfig,
     path: string
   ): Promise<void> => {
     if (FileIO.isWritingToFile) {

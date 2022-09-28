@@ -16,6 +16,8 @@ export interface LidarDeviceConfig {
   y: number;
   color: string;
   scanMaskThresholds?: AnglesWithThresholds;
+  /** If defined, ignore samples closer than this for CLUSTERING  */
+  minDistanceThreshold?: number;
 }
 
 export enum CornerIndex {
@@ -31,7 +33,7 @@ export interface CornerPoint {
   y: number;
 }
 
-export interface LidarConsolidatedConfig {
+export interface ConsolidatorConfig {
   devices: LidarDeviceConfig[];
   regionOfInterest?: CornerPoint[];
 }

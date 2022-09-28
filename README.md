@@ -48,3 +48,4 @@ After building, you can run the agent with the following command line arguments:
 
 - [x] "Region of interest" using `saveCornerPoints` message could be useful; then send normalised coordinates from this agent
 - [x] "Background" removal
+- [ ] Some proper unit tests for reducer, etc.
