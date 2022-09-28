@@ -17,6 +17,7 @@ export interface Config {
     /** Wait, in milliseconds, before sending on startup */
     delay: number;
   };
+  defaultMinDistanceThreshold: number;
   clustering: {
     /** Max distance in mm to a point which can be included in a cluster */
     neighbourhoodRadius: number;

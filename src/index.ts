@@ -251,7 +251,8 @@ const onScanReceived = (
         rotation: 0,
         x: 0,
         y: 0,
-        color: "#" + convert.hsv.hex(Math.round(Math.random() * 360), 100, 100), // assign random color
+        color: "#" + convert.hsv.hex(Math.round(Math.random() * 360), 100, 100), // assign random color,
+        minDistanceThreshold: config.defaultMinDistanceThreshold,
       })
     );
 

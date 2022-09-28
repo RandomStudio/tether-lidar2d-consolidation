@@ -18,6 +18,7 @@ const defaults: Config = {
     onStartup: true,
     delay: 2000,
   },
+  defaultMinDistanceThreshold: 20,
   clustering: {
     neighbourhoodRadius: 300,
     minNeighbours: 3,

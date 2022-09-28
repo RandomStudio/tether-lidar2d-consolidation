@@ -6,7 +6,7 @@ import {
   LidarDeviceConfig,
 } from "../consolidator/types";
 
-interface StoreState {
+export interface StoreState {
   config: ConsolidatorConfig;
 }
 
