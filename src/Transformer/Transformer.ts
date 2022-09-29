@@ -66,29 +66,4 @@ export default class PerspectiveTransformer {
       })
       .filter((p) => p !== null);
   };
-
-  /**
-   * Use the top left, top right and bottom right corners to work out the aspect ratio
-   * (width/height). We ignore the fact that some of these corner angles may not
-   * be right angles.
-   */
-  getAspectRatio = (): number | null => {
-    if (this.srcCorners && this.srcCorners.length === 4) {
-      const cArray = this.srcCorners;
-      const topLeft: Point2D = { x: cArray[0], y: cArray[1] };
-      const topRight: Point2D = { x: cArray[2], y: cArray[3] };
-      const bottomRight: Point2D = { x: cArray[4], y: cArray[5] };
-      const w = getDistance(topLeft, topRight);
-      const h = getDistance(topRight, bottomRight);
-      return w / h;
-    } else {
-      logger.warn(
-        "getAspectRatio requested, but source corners are not (yet) valid"
-      );
-      return null;
-    }
-  };
 }
-
-const getDistance = (a: Point2D, b: Point2D): number =>
-  Math.sqrt(Math.pow(b.x - a.x, 2) + Math.pow(b.y - a.y, 2));
