@@ -9,7 +9,6 @@ import {
 } from "./types";
 
 import { logger } from "..";
-import { config } from "process";
 
 export default class Consolidator {
   private dbscan: Clustering.DBSCAN;
