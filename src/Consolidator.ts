@@ -46,7 +46,8 @@ export default class Consolidator {
     serial: string,
     samples: ScanSample[],
     minDistance: number,
-    scanMaskThresholds?: AnglesWithThresholds
+    scanMaskThresholds?: AnglesWithThresholds,
+    flipCoords?: [number, number]
   ) => {
     // only add scan data for known lidars
     const lidar = store
@@ -60,7 +61,8 @@ export default class Consolidator {
         lidar.x,
         lidar.y,
         minDistance,
-        scanMaskThresholds
+        scanMaskThresholds,
+        flipCoords
       );
       logger.trace(
         `Created ${transformedSamples.length} transformed samples from scan of size ${samples.length}`
@@ -119,7 +121,8 @@ export default class Consolidator {
     x: number,
     y: number,
     minDistance: number,
-    scanMaskThresholds?: AnglesWithThresholds
+    scanMaskThresholds?: AnglesWithThresholds,
+    flipCoords?: [number, number]
   ): Point2D[] =>
     samples
       .filter((s) => s[2] === undefined || s[2] > 0) // s[2] is quality, which may not be defined
@@ -151,16 +154,25 @@ export default class Consolidator {
       })
       .map((s) => {
         const [angle, distance] = s;
-        return {
-          x: x + Math.cos(Math.PI * ((angle + rotation) / 180)) * distance,
-          y: y + Math.sin(Math.PI * ((angle + rotation) / 180)) * distance,
-        };
+        return flipCoords
+          ? {
+              x:
+                (x +
+                  Math.cos(Math.PI * ((angle + rotation) / 180)) * distance) *
+                flipCoords[0],
+              y:
+                (y +
+                  Math.sin(Math.PI * ((angle + rotation) / 180)) * distance) *
+                flipCoords[1],
+            }
+          : {
+              x: x + Math.cos(Math.PI * ((angle + rotation) / 180)) * distance,
+              y: y + Math.sin(Math.PI * ((angle + rotation) / 180)) * distance,
+            };
       });
 
   /**
    * Consolidate a set of points from a cluster into a single tracked point
-   * @param scans
-   * @param indices
    */
   private consolidateCluster = (
     id: number,

@@ -10,7 +10,7 @@ import defaults from "./config/defaults";
 import store from "./redux";
 import ConfigFileManager from "./ConfigFileManager";
 
-import Consolidator from "./consolidator";
+import Consolidator from "./Consolidator";
 
 import { Config } from "./config/types";
 import { decode, encode } from "@msgpack/msgpack";
@@ -87,6 +87,7 @@ const main = async () => {
   }
 
   const requestConfigInput = agent.createInput("requestLidarConfig");
+
   const provideLidarConfigOutput = agent.createOutput("provideLidarConfig");
   if (config.autoBroadcastConfig.onStartup) {
     setTimeout(() => {
@@ -106,6 +107,7 @@ const main = async () => {
   scansInput.onMessage((payload, topic) => {
     const message = decode(payload) as ScanMessage;
     const serial = parseAgentIdOrGroup(topic);
+
     onScanReceived(
       message,
       serial,
@@ -299,7 +301,8 @@ const onScanReceived = (
       serial,
       samples,
       existingDevice.minDistanceThreshold,
-      scanMaskThresholds
+      scanMaskThresholds,
+      existingDevice.flipCoords
     );
 
     const {

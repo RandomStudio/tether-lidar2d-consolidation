@@ -93,7 +93,20 @@ export const rootSlice = createSlice({
     clearMinDistance: (state, action: PayloadAction<{ serial: string }>) => {
       const { serial } = action.payload;
       const device = state.config.devices.find((d) => d.serial === serial);
-      device.minDistanceThreshold = undefined; // TODO: this might not work
+      device.minDistanceThreshold = 0;
+    },
+    setFlipCoords: (
+      state,
+      action: PayloadAction<{ serial: string; flipCoords: [number, number] }>
+    ) => {
+      const { serial } = action.payload;
+      const device = state.config.devices.find((d) => d.serial === serial);
+      device.flipCoords = action.payload.flipCoords;
+    },
+    clearFlipCoords: (state, action: PayloadAction<{ serial: string }>) => {
+      const { serial } = action.payload;
+      const device = state.config.devices.find((d) => d.serial === serial);
+      device.flipCoords = [1, 1];
     },
   },
 });
@@ -111,6 +124,8 @@ export const {
   clearMask,
   setMinDistance,
   clearMinDistance,
+  setFlipCoords,
+  clearFlipCoords,
 } = rootSlice.actions;
 
 export default rootSlice.reducer;
