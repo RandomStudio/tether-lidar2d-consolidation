@@ -16,6 +16,7 @@ import { Config } from "./config/types";
 import { decode, encode } from "@msgpack/msgpack";
 import {
   ConsolidatorConfig,
+  LidarDeviceConfig,
   RequestAutoMaskMessage,
   ScanMessage,
   ScanSample,
@@ -54,6 +55,19 @@ const broadcastState = (agent: TetherAgent) => {
   } else {
     logger.error("broadcastState: Could not find Output provideLidarConfig");
   }
+};
+
+const newDefaultDevice = (serial: string): LidarDeviceConfig => {
+  return {
+    serial,
+    name: serial,
+    rotation: 0,
+    x: 0,
+    y: 0,
+    color: "#" + convert.hsv.hex([Math.round(Math.random() * 360), 100, 100]),
+    minDistanceThreshold: config.defaultMinDistanceThreshold,
+    flipCoords: [1, 1],
+  };
 };
 
 const main = async () => {
@@ -277,18 +291,7 @@ const onScanReceived = (
       `Found unregistered lidar agent with serial ${serial}. Adding new config.`
     );
     // Register new lidar with its serial number
-    store.dispatch(
-      addDevice({
-        serial,
-        name: serial,
-        rotation: 0,
-        x: 0,
-        y: 0,
-        color:
-          "#" + convert.hsv.hex([Math.round(Math.random() * 360), 100, 100]), // assign random color,
-        minDistanceThreshold: config.defaultMinDistanceThreshold,
-      })
-    );
+    store.dispatch(addDevice(newDefaultDevice(serial)));
 
     // Also save to disk
     ConfigFileManager.save(store.getState().config, config.lidarConfigPath)
