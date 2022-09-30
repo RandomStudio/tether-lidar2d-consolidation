@@ -110,16 +110,12 @@ export default class Consolidator {
 
   /**
    * Apply transformations (rotation + translation) to a set of samples
-   * @param samples
-   * @param rotation
-   * @param x
-   * @param y
    */
   private transformScanSamples = (
     samples: ScanSample[],
-    rotation: number,
-    x: number,
-    y: number,
+    deviceRotation: number,
+    offsetX: number,
+    offsetY: number,
     minDistance: number,
     scanMaskThresholds?: AnglesWithThresholds,
     flipCoords?: [number, number]
@@ -153,22 +149,20 @@ export default class Consolidator {
         }
       })
       .map((s) => {
+        const flip = flipCoords ? flipCoords : [1, 1];
         const [angle, distance] = s;
-        return flipCoords
-          ? {
-              x:
-                (x +
-                  Math.cos(Math.PI * ((angle + rotation) / 180)) * distance) *
-                flipCoords[0],
-              y:
-                (y +
-                  Math.sin(Math.PI * ((angle + rotation) / 180)) * distance) *
-                flipCoords[1],
-            }
-          : {
-              x: x + Math.cos(Math.PI * ((angle + rotation) / 180)) * distance,
-              y: y + Math.sin(Math.PI * ((angle + rotation) / 180)) * distance,
-            };
+        return {
+          x:
+            offsetX +
+            Math.cos(Math.PI * ((angle + deviceRotation) / 180)) *
+              distance *
+              flip[0],
+          y:
+            offsetY +
+            Math.sin(Math.PI * ((angle + deviceRotation) / 180)) *
+              distance *
+              flip[1],
+        };
       });
 
   /**
