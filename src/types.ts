@@ -18,6 +18,7 @@ export interface LidarDeviceConfig {
   scanMaskThresholds?: AnglesWithThresholds;
   /** If nonzero, ignore samples closer than this for CLUSTERING  */
   minDistanceThreshold: number;
+  flipCoords?: [number, number];
 }
 
 export enum CornerIndex {

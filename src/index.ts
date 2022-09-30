@@ -8,7 +8,7 @@ import { TetherAgent, Output, parseAgentIdOrGroup } from "@randomstudio/tether";
 import defaults from "./config/defaults";
 
 import store from "./redux";
-import FileIO from "./file-io";
+import ConfigFileManager from "./ConfigFileManager";
 
 import Consolidator from "./consolidator";
 
@@ -33,8 +33,8 @@ import {
   setRotation,
   setTranslation,
 } from "./redux/rootSlice";
-import PerspectiveTransformer from "./Transformer/Transformer";
-import AutoMaskSampler from "./AutoMask/AutoMaskSampler";
+import PerspectiveTransformer from "./Transformer";
+import AutoMaskSampler from "./AutoMaskSampler";
 
 const config: Config = parseConfig(rc("Lidar2DConsolidationAgent", defaults));
 
@@ -62,14 +62,19 @@ const main = async () => {
 
   try {
     // load lidar transformations from external file
-    const lidarConsolidatedConfig = await FileIO.load(config.lidarConfigPath);
+    const lidarConsolidatedConfig = await ConfigFileManager.load(
+      config.lidarConfigPath
+    );
     logger.info("Loaded config:", lidarConsolidatedConfig);
     store.dispatch(loadStore(lidarConsolidatedConfig));
   } catch (err) {
     logger.warn(
       `Could not load config file, saving default config to new file.`
     );
-    await FileIO.save(store.getState().config, config.lidarConfigPath);
+    await ConfigFileManager.save(
+      store.getState().config,
+      config.lidarConfigPath
+    );
   }
 
   const clusterOutput = agent.createOutput("clusters");
@@ -173,7 +178,10 @@ const main = async () => {
         });
 
         // Also save entire config (devices and any regionOfInterest, to disk)
-        await FileIO.save(store.getState().config, config.lidarConfigPath);
+        await ConfigFileManager.save(
+          store.getState().config,
+          config.lidarConfigPath
+        );
 
         // And new state broadcast
         broadcastState(agent);
@@ -226,7 +234,10 @@ const main = async () => {
     }
 
     // Also save entire config (devices and any regionOfInterest, to disk)
-    await FileIO.save(store.getState().config, config.lidarConfigPath);
+    await ConfigFileManager.save(
+      store.getState().config,
+      config.lidarConfigPath
+    );
 
     // And re-broadcast updated state
     broadcastState(agent);
@@ -258,13 +269,14 @@ const onScanReceived = (
         rotation: 0,
         x: 0,
         y: 0,
-        color: "#" + convert.hsv.hex(Math.round(Math.random() * 360), 100, 100), // assign random color,
+        color:
+          "#" + convert.hsv.hex([Math.round(Math.random() * 360), 100, 100]), // assign random color,
         minDistanceThreshold: config.defaultMinDistanceThreshold,
       })
     );
 
     // Also save to disk
-    FileIO.save(store.getState().config, config.lidarConfigPath)
+    ConfigFileManager.save(store.getState().config, config.lidarConfigPath)
       .then(() => {
         logger.info("Saved new config to disk OK");
       })
