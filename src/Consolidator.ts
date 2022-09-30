@@ -151,17 +151,17 @@ export default class Consolidator {
       .map((s) => {
         const flip = flipCoords ? flipCoords : [1, 1];
         const [angle, distance] = s;
+        const alteredAngle =
+          flipCoords[0] === flipCoords[1]
+            ? angle + deviceRotation
+            : angle - deviceRotation;
         return {
           x:
             offsetX +
-            Math.cos(Math.PI * ((angle + deviceRotation) / 180)) *
-              distance *
-              flip[0],
+            Math.cos(Math.PI * (alteredAngle / 180)) * distance * flip[0],
           y:
             offsetY +
-            Math.sin(Math.PI * ((angle + deviceRotation) / 180)) *
-              distance *
-              flip[1],
+            Math.sin(Math.PI * (alteredAngle / 180)) * distance * flip[1],
         };
       });
 
