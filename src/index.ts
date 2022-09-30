@@ -26,6 +26,7 @@ import {
   clearROI,
   loadStore,
   setColor,
+  setFlipCoords,
   setMask,
   setMinDistance,
   setName,
@@ -205,7 +206,16 @@ const main = async () => {
     logger.info("Received config to save, with", devices.length, "device(s)");
 
     devices.forEach((d) => {
-      const { serial, name, rotation, x, y, color, minDistanceThreshold } = d;
+      const {
+        serial,
+        name,
+        rotation,
+        x,
+        y,
+        color,
+        minDistanceThreshold,
+        flipCoords,
+      } = d;
 
       const device = store
         .getState()
@@ -219,6 +229,9 @@ const main = async () => {
           store.dispatch(
             setMinDistance({ serial, distance: minDistanceThreshold })
           );
+        }
+        if (flipCoords) {
+          store.dispatch(setFlipCoords({ serial, flipCoords }));
         }
       } else {
         throw Error("Could not match LIDAR by serial number " + serial);
