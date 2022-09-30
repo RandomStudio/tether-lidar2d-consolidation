@@ -1,5 +1,5 @@
 import { logger } from "..";
-import { AnglesWithThresholds, ScanSample } from "../consolidator/types";
+import { AnglesWithThresholds, ScanSample } from "../types";
 
 class AutoMaskSampler {
   private serial: string;

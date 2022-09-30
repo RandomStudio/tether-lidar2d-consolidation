@@ -1,8 +1,8 @@
-import { CornerPoint, Point2D, TrackedPoint2D } from "../consolidator/types";
 import PerspT from "perspective-transform";
 
 import { logger } from "../";
 import { PerspectiveTransformConfig } from "../config/types";
+import { CornerPoint, TrackedPoint2D } from "../types";
 
 export default class PerspectiveTransformer {
   private config: PerspectiveTransformConfig;

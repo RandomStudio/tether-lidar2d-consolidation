@@ -1,14 +1,14 @@
 import Clustering from "density-clustering";
 import store from "../redux";
+
+import { logger } from "..";
 import {
   AnglesWithThresholds,
   Point2D,
   ScanData,
   ScanSample,
   TrackedPoint2D,
-} from "./types";
-
-import { logger } from "..";
+} from "../types";
 
 export default class Consolidator {
   private dbscan: Clustering.DBSCAN;

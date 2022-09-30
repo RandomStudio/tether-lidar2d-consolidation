@@ -19,7 +19,7 @@ import {
   RequestAutoMaskMessage,
   ScanMessage,
   ScanSample,
-} from "./consolidator/types";
+} from "./types";
 import {
   addDevice,
   clearMask,

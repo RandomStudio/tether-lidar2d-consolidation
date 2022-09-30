@@ -4,7 +4,7 @@ import {
   CornerPoint,
   ConsolidatorConfig,
   LidarDeviceConfig,
-} from "../consolidator/types";
+} from "../types";
 
 export interface StoreState {
   config: ConsolidatorConfig;

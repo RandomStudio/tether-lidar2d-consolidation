@@ -1,6 +1,6 @@
 import fs from "fs/promises";
 import { logger } from "..";
-import { ConsolidatorConfig } from "../consolidator/types";
+import { ConsolidatorConfig } from "../types";
 
 export default class FileIO {
   private static isWritingToFile: boolean = false;
